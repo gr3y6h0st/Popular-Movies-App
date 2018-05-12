@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Lis
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), numberOfColumns);
         mMovieList.setLayoutManager(layoutManager);
         mMovieList.setHasFixedSize(true);
+        refreshMovieDB();
     }
 
     public void refreshMovieDB() {

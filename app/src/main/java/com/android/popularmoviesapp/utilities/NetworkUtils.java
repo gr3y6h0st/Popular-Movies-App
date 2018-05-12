@@ -16,7 +16,7 @@ public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     //insert your own API KEY
-    private static final String API_KEY = "YOU_API_KEY_HERE";
+    private static final String API_KEY = "YOUR_API_KEY";
 
 
     private static final String STATIC_MOVIE_DATABASE_URL =
