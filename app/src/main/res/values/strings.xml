@@ -1,5 +1,7 @@
 <resources>
+    <string name="content_authority">com.android.popularmoviesapp</string>
     <string name="app_name">Popular Movies</string>
+
     <string name="sort_list_pref_label">Sort Movies</string>
     <string name="sort_key" translatable="false">sort</string>
     <string name="sort_default">popular</string>
@@ -14,4 +16,5 @@
     <string name="md_date_label">Release Date:</string>
     <string name="md_synopsis_label">Synopsis:</string>
     <string name="action_movie_details_label">Movie Details</string>
+    <string name="No_trailer_text">No Trailer available at this time.</string>
 </resources>

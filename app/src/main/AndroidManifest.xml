@@ -38,6 +38,21 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
+        <!-- ContentProvider -->
+        <provider
+            android:name=".data.MovieProvider"
+            android:authorities="com.android.popularmoviesapp"
+            android:enabled="true"
+            android:exported="false"/>
+
+        <service
+            android:name=".sync.MovieInfoSyncIntentService"
+            android:exported="false"/>
+        <service
+            android:name=".sync.MovieTrailerIntentService"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

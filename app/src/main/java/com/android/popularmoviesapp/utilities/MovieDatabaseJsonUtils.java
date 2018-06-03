@@ -1,26 +1,43 @@
 package com.android.popularmoviesapp.utilities;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.util.Log;
 
+import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.data.MovieData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.IDN;
 import java.util.ArrayList;
+import java.util.List;
 
 public final class MovieDatabaseJsonUtils {
 
     final static String TAG = MovieDatabaseJsonUtils.class.getSimpleName();
+    final static String RESULTS = "results";
+    final static String ORIGINAL_TITLE = "original_title";
+    final static String OVERVIEW = "overview";
+    final static String RELEASE_DATE = "release_date";
+    final static String POSTER_PATH = "poster_path";
+    final static String VOTE_AVERAGE = "vote_average";
+    final static String MOVIE_ID = "id";
+
+    final static String MOVIE_TRAILER_ID = "id";
+    final static String MOVIE_TRAILER_KEY = "key";
+    final static String MOVIE_TRAILER_NAME = "name";
+    final static String MOVIE_TRAILER_SITE = "site";
+    final static String MOVIE_TRAILER_TYPE = "type";
+    final static String MOVIE_TRAILER_COUNT = "count";
+
+    //public static List<String> trailer_Keys = new ArrayList<String>();
+
 
     public static ArrayList<MovieData> getMovieData(String json) throws JSONException {
-        final String RESULTS = "results";
-        final String ORIGINAL_TITLE = "original_title";
-        final String OVERVIEW = "overview";
-        final String RELEASE_DATE = "release_date";
-        final String POSTER_PATH = "poster_path";
-        final String VOTE_AVERAGE = "vote_average";
+
 
         JSONObject movieData = new JSONObject(json);
         JSONArray results = movieData.getJSONArray(RESULTS);
@@ -32,14 +49,112 @@ public final class MovieDatabaseJsonUtils {
             MovieData movieSpecifics = new MovieData(
                     currentMovie.getString(ORIGINAL_TITLE),
                     currentMovie.getString(POSTER_PATH),
-                    currentMovie.getString(OVERVIEW),
                     currentMovie.getString(VOTE_AVERAGE),
-                    currentMovie.getString(RELEASE_DATE)
-            );
+                    currentMovie.getString(RELEASE_DATE),
+                    currentMovie.getString(OVERVIEW)
+                    );
             moviesArray.add(movieSpecifics);
-            Log.v(TAG, moviesArray.get(i).getPoster_path());
+            //Log.v(TAG, moviesArray.get(i).getPoster_path());
         }
 
         return moviesArray;
+    }
+
+    public static ContentValues getContentValueTrailerData (Context context, String movieJsonStr)
+            throws JSONException {
+
+        JSONObject movieData = new JSONObject(movieJsonStr);
+
+        // check for an error
+        //if (movieData.has())
+
+        JSONArray results = movieData.getJSONArray(RESULTS);
+        //Log.d(TAG, results.getJSONObject(0).getString("key"));
+        List<String> trailerKeys = new ArrayList<String>();
+
+
+        ContentValues trailerContentValues = new ContentValues();
+
+        for(int i = 0; i < results.length(); i++){
+
+            String name;
+            String site;
+            String type;
+            String key;
+            String id;
+
+            // get current JSON object
+            JSONObject currentTrailer = results.getJSONObject(i);
+
+            //extract movie details from current JSON object
+            name = currentTrailer.getString(MOVIE_TRAILER_NAME);
+            site = currentTrailer.getString(MOVIE_TRAILER_SITE);
+            key = currentTrailer.getString(MOVIE_TRAILER_KEY);
+            trailerKeys.add(key);
+            Log.d(TAG, trailerKeys.get(i));
+            id = currentTrailer.getString(MOVIE_TRAILER_ID);
+            type = currentTrailer.getString(MOVIE_TRAILER_TYPE);
+
+            Log.v(TAG, type);
+
+            if(type.equals("Trailer")) {
+                ContentValues trailerSpecifics = new ContentValues();
+                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_NAME, name);
+                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_KEY, key);
+                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_SITE, site);
+                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_ID, id);
+                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_TYPE, type);
+
+                trailerContentValues = trailerSpecifics;
+            }
+        }
+
+        return trailerContentValues;
+    }
+
+    public static ContentValues[] getContentValueMovieData (Context context, String trailerJsonStr)
+            throws JSONException {
+
+        JSONObject trailerData
+                = new JSONObject(trailerJsonStr);
+
+        // check for an error
+        //if (movieData.has())
+
+        JSONArray results = trailerData.getJSONArray(RESULTS);
+        ContentValues[] movieContentValues = new ContentValues[results.length()];
+
+        for(int i = 0; i < results.length(); i++){
+
+            String original_title;
+            String posterPath;
+            String overview;
+            String voteAverage;
+            String releaseDate;
+            String id;
+
+            // get current JSON object
+            JSONObject currentMovie = results.getJSONObject(i);
+
+            //extract movie details from current JSON object
+            original_title = currentMovie.getString(ORIGINAL_TITLE);
+            posterPath = currentMovie.getString(POSTER_PATH);
+            overview = currentMovie.getString(OVERVIEW);
+            voteAverage = currentMovie.getString(VOTE_AVERAGE);
+            releaseDate = currentMovie.getString(RELEASE_DATE);
+            id = currentMovie.getString(MOVIE_ID);
+
+            ContentValues movieSpecifics = new ContentValues();
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_TITLE, original_title);
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, voteAverage);
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
+
+            movieContentValues[i] = movieSpecifics;
+        }
+
+        return movieContentValues;
     }
 }

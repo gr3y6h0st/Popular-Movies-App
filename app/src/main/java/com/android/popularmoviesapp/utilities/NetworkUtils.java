@@ -1,6 +1,7 @@
 package com.android.popularmoviesapp.utilities;
 
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -16,21 +17,29 @@ public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     //insert your own API KEY
-    private static final String API_KEY = "YOUR_API_KEY";
+    private static final String API_KEY = "INSERT API KEY HERE";
 
 
     private static final String STATIC_MOVIE_DATABASE_URL =
-            "https://api.themoviedb.org/3/movie";
+            "https://api.themoviedb.org/3/movie/";
 
     private static final String MOVIEDB_BASE_URL = STATIC_MOVIE_DATABASE_URL;
 
     private static final String format = "json";
 
+    private static final String APPID_PARAM = "api_key";
+
+    private static final String VIDEO_PATH = "videos";
+
+    private static String MOVIE_ID;
+
+    private static String REVIEW_PATH = "reviews";
+
+    //default value as popular
     private static String SORT_ORDER = "popular";
 
-    private final static String APPID_PARAM = "api_key";
 
-    public static URL buildUrl(String movieQuery) {
+    public static URL buildUrl(Context context) {
         Uri builtUri = Uri.parse(MOVIEDB_BASE_URL).buildUpon()
                 .appendPath(SORT_ORDER)
                 .appendQueryParameter(APPID_PARAM, API_KEY)
@@ -47,8 +56,47 @@ public class NetworkUtils {
         return url;
     }
 
+    public static URL trailersBuildUrl (Context context){
+        Uri builtUri = Uri.parse(MOVIEDB_BASE_URL + MOVIE_ID).buildUpon()
+                .appendPath(VIDEO_PATH)
+                .appendQueryParameter(APPID_PARAM, API_KEY)
+                .build();
+
+        URL url = null;
+        try{
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e){
+            e.printStackTrace();
+        }
+        Log.v(TAG, "Built URI " + url);
+        return url;
+    }
+
+    public static URL reviewsBuildUrl (Context context){
+        Uri builtUri = Uri.parse(MOVIEDB_BASE_URL + MOVIE_ID).buildUpon()
+                .appendPath(VIDEO_PATH)
+                .appendQueryParameter(APPID_PARAM, API_KEY)
+                .build();
+
+        URL url = null;
+        try{
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e){
+            e.printStackTrace();
+        }
+        Log.v(TAG, "Built URI " + url);
+        return url;
+    }
+
     public void setSortOrder (String sortOrder){
         this.SORT_ORDER = sortOrder;
+    }
+
+    public static void setMovieID(String movie_id){
+        MOVIE_ID = movie_id;
+    }
+    public static String getMovieId(){
+        return MOVIE_ID;
     }
 
     /** Method returns entire result from HTTP response.

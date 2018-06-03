@@ -3,134 +3,166 @@ package com.android.popularmoviesapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.preference.Preference;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.View;
 
-import com.android.popularmoviesapp.data.MovieData;
-import com.android.popularmoviesapp.utilities.MovieDatabaseJsonUtils;
+import com.android.popularmoviesapp.data.MovieContract;
+import com.android.popularmoviesapp.sync.MovieInfoSyncIntentService;
+import com.android.popularmoviesapp.sync.MovieTrailerIntentService;
 import com.android.popularmoviesapp.utilities.NetworkUtils;
-import java.net.URL;
-import java.util.ArrayList;
 
-import static com.android.popularmoviesapp.utilities.NetworkUtils.*;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.ListItemClickListener,
-        SharedPreferences.OnSharedPreferenceChangeListener  {
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        MoviesAdapter.MoviesAdapterOnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private final String TAG = MainActivity.class.getSimpleName();
+    private NetworkUtils networkUtils = new NetworkUtils();
+
+    public static final String[] MOVIE_DATA_ARRAY = {
+            MovieContract.MovieEntry.COLUMN_TITLE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+            MovieContract.MovieEntry.COLUMN_OVERVIEW,
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID
+            //MovieContract.MovieEntry.COLUMN_TRAILER_KEY
+    };
+
+    public static final int INDEX_OG_TITLE = 0;
+    public static final int INDEX_POSTER_PATH = 1;
+    public static final int INDEX_VOTE_AVG = 2;
+    public static final int INDEX_RELEASE_DATE = 3;
+    public static final int INDEX_OVERVIEW = 4;
+    public static final int INDEX_COLUMN_MOVIE_ID = 5;
+    //public static final int INDEX_COLUMN_TRAILER_KEY = 6;
+
+    public static final int ID_MOVIE_LOADER = 19;
 
     private RecyclerView mMovieList;
     private MoviesAdapter mAdapter;
-    private NetworkUtils networkUtils = new NetworkUtils();
-    //create the movie data ArrayList
-    public static ArrayList<MovieData> movieDataArrayList = new ArrayList<>();
-
-    @Override
-    protected void onStart() {
-        refreshMovieDB();
-        super.onStart();
-    }
+    private int mPosition = RecyclerView.NO_POSITION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //create the movie data ArrayList
-        final ArrayList<MovieData> movieData = movieDataArrayList;
-
         //find the RecyclerView, set it to variable
         mMovieList = (RecyclerView) findViewById(R.id.movies_rv);
-
         //define variable for # of columns to display in GridLayoutManager
         int numberOfColumns = 2;
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), numberOfColumns);
+        RecyclerView.LayoutManager layoutManager =
+                new GridLayoutManager(getApplicationContext(), numberOfColumns);
         mMovieList.setLayoutManager(layoutManager);
         mMovieList.setHasFixedSize(true);
-        refreshMovieDB();
+
+        mAdapter = new MoviesAdapter(this, this);
+
+        mMovieList.setAdapter(mAdapter);
+
+        getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
+
     }
 
-    public void refreshMovieDB() {
-        //create asynctask object
-        FetchMoviesDataTask fetchMoviesDataTask = new FetchMoviesDataTask();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+        startService(syncMovieInfo);
+        setupMB();
+        getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
+
+    }
+
+    private void setupMB() {
+
         //create preferences object
         SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                PreferenceManager.getDefaultSharedPreferences(this);
 
-        //set default sort
-        String sortInfo = preferences.getString(getString(R.string.sort_key), getString(R.string.sort_default));
-        //execute asynctask
-        fetchMoviesDataTask.execute(sortInfo);
+        //get values for shared preference
+        loadMovieSortPreference(preferences);
+
 
         //set listener for changes in Preference data
         preferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
-    public void onListItemClick(int clickedItemIndex) {
-        // COMPLETED: add intent to MovieDetailsActivity here
-        Intent startMovieDetailActivity = new Intent(MainActivity.this, MovieDetailActivity.class);
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(key.equals(getString(R.string.sort_key))) {
+            loadMovieSortPreference(sharedPreferences);
+        }
+    }
 
-        //use putExtra to transfer movieData to child Activity
-        startMovieDetailActivity.putExtra("movie_deets", movieDataArrayList.get(clickedItemIndex));
-        startActivity(startMovieDetailActivity);
+    private void loadMovieSortPreference (SharedPreferences preferences) {
+        networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
+                getString(R.string.sort_default)));
+    }
+
+    @NonNull
+    @Override
+    public android.support.v4.content.Loader<Cursor> onCreateLoader(int loaderId, @Nullable Bundle args) {
+        //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+        //startService(syncMovieInfo);
+        switch (loaderId) {
+            case ID_MOVIE_LOADER:
+
+                Uri moviesQueryUri = MovieContract.MovieEntry.CONTENT_URI;
+
+                return new android.support.v4.content.CursorLoader(this,
+                        moviesQueryUri,
+                        MOVIE_DATA_ARRAY,
+                        null,
+                        null,
+                        null);
+            default:
+                throw new RuntimeException("Loader not implemented: " + loaderId);
+
+        }    }
+
+    @Override
+    public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+        if(mPosition == RecyclerView.NO_POSITION) mPosition = 0;
+        mMovieList.smoothScrollToPosition(mPosition);
+
+        data.moveToFirst();
+        Log.v(TAG , DatabaseUtils.dumpCursorToString(data));
+
+        //if(cursor.getCount() != 0)
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(key.equals(getString(R.string.sort_key))) {
-            networkUtils.setSortOrder(sharedPreferences.getString(key, getResources().getString(R.string.sort_default)));
-        }
+    public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 
-    class FetchMoviesDataTask extends AsyncTask<String, Void, ArrayList<MovieData>>{
+    @Override
+    public void onItemClick(View view, String movie_id) {
 
-        @Override
-        protected ArrayList<MovieData> doInBackground(String... params) {
-            if(params.length == 0){
-                return null;
-            }
+        Intent syncMovieTrailer = new Intent(this, MovieTrailerIntentService.class);
+        startService(syncMovieTrailer);
 
-            String movie = params[0];
-            URL movieRequestUrl = NetworkUtils.buildUrl(movie);
+        Intent intentToStartMovieDetailActivity = new Intent(MainActivity.this, MovieDetailActivity.class);
+        Uri movieClicked = MovieContract.MovieEntry.buildMovieDetailPageUri(movie_id);
 
-            try {
-                String jsonMovieDatabaseResponse =
-                        getResponseFromHttpUrl(movieRequestUrl);
+        intentToStartMovieDetailActivity.setData(movieClicked);
+        startActivity(intentToStartMovieDetailActivity);
 
-                ArrayList<MovieData> simpleJsonMovieData = MovieDatabaseJsonUtils
-                        .getMovieData(jsonMovieDatabaseResponse);
-                Log.v("READ", simpleJsonMovieData.get(0).getPoster_path());
-                return simpleJsonMovieData;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<MovieData> movieData) {
-            super.onPostExecute(movieData);
-            if (movieData != null) {
-                mAdapter = new MoviesAdapter(getApplicationContext(), movieData, MainActivity.this);
-
-                //populate the global ArrayList for use elsewhere
-                movieDataArrayList = movieData;
-
-                mMovieList.setAdapter(mAdapter);
-                Log.v("README", movieData.get(0).getPoster_path());
-            } else {
-                Log.v("README", "MovieData Arraylist is null or empty.");
-            }
-        }
     }
 
     @Override
@@ -144,6 +176,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Lis
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
+        mAdapter.swapCursor(null);
+
     }
 
     @Override
@@ -157,5 +191,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Lis
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
 
