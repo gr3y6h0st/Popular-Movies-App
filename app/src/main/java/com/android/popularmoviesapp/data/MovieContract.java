@@ -43,13 +43,9 @@ public class MovieContract {
         public static final String COLUMN_TRAILER_SITE = "site";
         public static final String COLUMN_TRAILER_ID = "trailerID";
 
-
-
-
-
-
-
-
+        public static final String COLUMN_REVIEW_AUTHOR = "author";
+        public static final String COLUMN_REVIEW_CONTENT = "content";
+        public static final String COLUMN_REVIEW_URL = "url";
 
     }
 }

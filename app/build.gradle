@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    buildTypes.each {
+        it.buildConfigField 'String', 'MY_MOVIE_DB_API_KEY', MyMovieDbApiKey
+    }
     dataBinding {
         enabled = true
     }
@@ -31,4 +35,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
     compile 'com.android.support:preference-v7:27.1.1'
+    compile 'com.squareup.retrofit2:retrofit:2.4.0'
+
 }

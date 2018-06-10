@@ -13,20 +13,17 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.databinding.DataBindingUtil;
 import android.view.View;
-import android.widget.LinearLayout;
 
 import com.android.popularmoviesapp.databinding.ActivityMovieDetailBinding;
 
 import com.android.popularmoviesapp.data.MovieContract;
-import com.android.popularmoviesapp.sync.MovieTrailerIntentService;
-import com.android.popularmoviesapp.utilities.MovieDatabaseJsonUtils;
+import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.squareup.picasso.Picasso;
 
 public class MovieDetailActivity extends AppCompatActivity implements
@@ -43,7 +40,10 @@ public class MovieDetailActivity extends AppCompatActivity implements
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
             MovieContract.MovieEntry.COLUMN_TRAILER_KEY,
             MovieContract.MovieEntry.COLUMN_TRAILER_TYPE,
-            MovieContract.MovieEntry.COLUMN_TRAILER_NAME
+            MovieContract.MovieEntry.COLUMN_TRAILER_NAME,
+            MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR,
+            MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT,
+            MovieContract.MovieEntry.COLUMN_REVIEW_URL
     };
 
     public static final int INDEX_MOVIE_TITLE = 0;
@@ -52,11 +52,14 @@ public class MovieDetailActivity extends AppCompatActivity implements
     public static final int INDEX_MOVIE_RELEASE_DATE = 3;
     public static final int INDEX_MOVIE_OVERVIEW = 4;
     public static final int INDEX_MOVIE_ID = 5;
+
     public static final int INDEX_TRAILER_KEY = 6;
     public static final int INDEX_TRAILER_TYPE = 7;
     public static final int INDEX_TRAILER_NAME = 8;
 
-
+    public static final int INDEX_REVIEW_AUTHOR = 9;
+    public static final int INDEX_REVIEW_CONTENT = 10;
+    public static final int INDEX_REVIEW_URL = 11;
 
     private static final int ID_MOVIE_DETAIL_LOADER = 519;
 
@@ -65,7 +68,11 @@ public class MovieDetailActivity extends AppCompatActivity implements
     private ActivityMovieDetailBinding mDetailBinding;
 
     private RecyclerView mMovieTrailerList;
-    private MovieDetailAdapter mTrailerAdapter;
+    private RecyclerView mMovieReviewList;
+
+    private MovieTrailerAdapter mTrailerAdapter;
+    private MovieReviewAdapter mReviewAdapter;
+
     private int mPosition = RecyclerView.NO_POSITION;
 
     @Override
@@ -82,18 +89,23 @@ public class MovieDetailActivity extends AppCompatActivity implements
         mDetailBinding = DataBindingUtil.setContentView(this,
                 R.layout.activity_movie_detail);
 
-        int numberOfColumns = 2;
+        RecyclerView.LayoutManager layoutTrailerManager =
+                new LinearLayoutManager(this);
 
-        RecyclerView.LayoutManager layoutManager =
+        RecyclerView.LayoutManager layoutReviewManager =
                 new LinearLayoutManager(this);
 
         mMovieTrailerList = mDetailBinding.mdTrailersRv;
+        mMovieReviewList = mDetailBinding.mdReviewsRv;
 
-        mMovieTrailerList.setLayoutManager(layoutManager);
+        mMovieTrailerList.setLayoutManager(layoutTrailerManager);
+        mMovieReviewList.setLayoutManager(layoutReviewManager);
 
-        mTrailerAdapter = new MovieDetailAdapter(5);
+        mTrailerAdapter = new MovieTrailerAdapter(5);
+        mReviewAdapter = new MovieReviewAdapter(2);
 
         mMovieTrailerList.setAdapter(mTrailerAdapter);
+        mMovieReviewList.setAdapter(mReviewAdapter);
 
         ActionBar actionBar = this.getSupportActionBar();
         if(actionBar != null){
@@ -102,11 +114,10 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
         mUri = getIntent().getData();
         if (mUri == null) throw new NullPointerException("URI cannot be null");
-        Intent syncMovieTrailer = new Intent(this, MovieTrailerIntentService.class);
-        startService(syncMovieTrailer);
 
         getSupportLoaderManager().initLoader(ID_MOVIE_DETAIL_LOADER, null, this);
-
+        Intent syncMovieReview = new Intent(this, MovieReviewIntentService.class);
+        startService(syncMovieReview);
 
     }
 
@@ -129,7 +140,6 @@ public class MovieDetailActivity extends AppCompatActivity implements
             case ID_MOVIE_DETAIL_LOADER:
                 Log.v(TAG, mUri.toString());
 
-
                 return new CursorLoader(this,
                         mUri,
                         MOVIE_DETAIL_PROJECTION,
@@ -144,8 +154,11 @@ public class MovieDetailActivity extends AppCompatActivity implements
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
         mTrailerAdapter.swapCursor(data);
+        mReviewAdapter.swapCursor(data);
+
         if(mPosition == RecyclerView.NO_POSITION) mPosition = 0;
         mDetailBinding.mdTrailersRv.smoothScrollToPosition(mPosition);
+        mDetailBinding.mdReviewsRv.smoothScrollToPosition(mPosition);
 
         //data.moveToFirst();
         Log.v(TAG, DatabaseUtils.dumpCursorToString(data));
@@ -173,9 +186,13 @@ public class MovieDetailActivity extends AppCompatActivity implements
         String movie_ID = data.getString(INDEX_MOVIE_ID);
 
         String trailer_type = data.getString(INDEX_TRAILER_TYPE);
-        //Log.v( TAG, movie_ID);
+
 
         String movieTrailerName = data.getString(INDEX_TRAILER_NAME);
+
+        String movieReviewAuthor = data.getString(INDEX_REVIEW_AUTHOR);
+        //Log.v( TAG, movieReviewAuthor);
+
         final String trailer_KEY = data.getString(INDEX_TRAILER_KEY);
 
 
@@ -201,19 +218,11 @@ public class MovieDetailActivity extends AppCompatActivity implements
         mDetailBinding.mdPlotSynopsisLabel.setText(getString(R.string.md_synopsis_label));
         mDetailBinding.mdReleaseDateLabel.setText(getString(R.string.md_date_label));
         mDetailBinding.mdVoteAvgLabel.setText(getString(R.string.md_rating_label));
-
-        mDetailBinding.mdPlayTrailerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent openYTApp = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + trailer_KEY));
-                startActivity(openYTApp);
-            }
-        });
-
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
         mTrailerAdapter.swapCursor(null);
+        mReviewAdapter.swapCursor(null);
     }
 }

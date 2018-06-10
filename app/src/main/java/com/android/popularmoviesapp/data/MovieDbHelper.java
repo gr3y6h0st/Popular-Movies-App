@@ -32,6 +32,9 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                         MovieContract.MovieEntry.COLUMN_TRAILER_TYPE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_TRAILER_SITE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_TRAILER_ID + " TEXT, " +
+                        MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR + " TEXT, " +
+                        MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT + " TEXT, " +
+                        MovieContract.MovieEntry.COLUMN_REVIEW_URL + " TEXT, " +
                         " UNIQUE (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
 
         //execute SQL w/ execSQL method of SQL database obj

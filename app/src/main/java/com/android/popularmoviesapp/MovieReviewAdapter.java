@@ -2,7 +2,6 @@ package com.android.popularmoviesapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -12,11 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 
-public class MovieDetailAdapter extends RecyclerView.Adapter<MovieDetailAdapter.MovieDetailHolder> {
+public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.MovieDetailHolder> {
 
-    private static final String TAG = MovieDetailAdapter.class.getSimpleName();
+    private static final String TAG = MovieReviewAdapter.class.getSimpleName();
 
     //final private MovieDetailAdapterOnClickListener mOnClickListener;
 
@@ -32,10 +32,10 @@ public class MovieDetailAdapter extends RecyclerView.Adapter<MovieDetailAdapter.
 
     private int mCount;
 
-    public MovieDetailAdapter(int trailer_count) {
+    public MovieReviewAdapter(int review_count) {
         //mContext = context;
 
-        mCount = trailer_count;
+        mCount = review_count;
         //this.mOnClickListener = listener;
 
     }
@@ -44,14 +44,15 @@ public class MovieDetailAdapter extends RecyclerView.Adapter<MovieDetailAdapter.
      * Cache of children views for list item.
      */
     public class MovieDetailHolder extends RecyclerView.ViewHolder {
-        private final Button listTrailerView;
+        private final TextView listReviewView;
         //Constructor for ViewHolder, references TextViews and sets onClickListener to listen for clicks
         //via onClick method.
         public MovieDetailHolder(View view){
             super(view);
-            listTrailerView = (Button) view.findViewById(R.id.movie_trailer_button);
+            listReviewView = (TextView) view.findViewById(R.id.movie_review_tv);
+            //view.setOnClickListener(this);
             //Call setOnClickListener to the View passed into constructor
-            listTrailerView.setOnClickListener(new View.OnClickListener() {
+            /*listReviewView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     //keeps track of position of item being clicked
@@ -63,7 +64,7 @@ public class MovieDetailAdapter extends RecyclerView.Adapter<MovieDetailAdapter.
                     Intent openYTApp = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + trailer_key));
                     mContext.startActivity(openYTApp);
                 }
-            });
+            });*/
         }
     }
 
@@ -71,9 +72,9 @@ public class MovieDetailAdapter extends RecyclerView.Adapter<MovieDetailAdapter.
     @Override
     public MovieDetailHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         mContext = viewGroup.getContext();
-        Log.d("onCreateViewHolder", "onCreateViewHolder Started");
+        Log.d("onCreateViewHolder", "onCreateViewHolder for REVIEW Started");
 
-        int layoutIdForListItem = R.layout.trailers_list_item;
+        int layoutIdForListItem = R.layout.reviews_list_item;
         boolean shouldAttachToParentImmediately = false;
 
         View view = LayoutInflater
@@ -93,44 +94,29 @@ public class MovieDetailAdapter extends RecyclerView.Adapter<MovieDetailAdapter.
      */
     @Override
     public void onBindViewHolder(@NonNull MovieDetailHolder holder, int position) {
-        String no_trailers_available = mContext.getString(R.string.No_trailer_text);
+        String no_reviews_available = mContext.getString(R.string.No_Review_Text);
+        //Log.d(TAG, mCursor.getString(MovieDetailActivity.INDEX_REVIEW_AUTHOR));
+
         if(mCursor == null){
-            holder.listTrailerView.setText(no_trailers_available);
+            holder.listReviewView.setText(mContext.getString(R.string.Cursor_is_null_adapter));
         }
          else {
             mCursor.moveToPosition(position);
+
             /**
-             * change code to reflect MOVIE TRAILER NAME
+             * change code to reflect MOVIE AUTHOR
              **/
 
-            String trailer_name = mCursor.getString(MovieDetailActivity.INDEX_TRAILER_NAME);
-            if (trailer_name!= null){
-                holder.listTrailerView.setText(trailer_name);
-
+            String review_content = mCursor.getString(MovieDetailActivity.INDEX_REVIEW_CONTENT);
+            if (review_content != null) {
+                holder.listReviewView.setText(review_content);
             } else {
-                holder.listTrailerView.setText(no_trailers_available);
+                holder.listReviewView.setText(no_reviews_available);
             }
         //move cursor to appropriate position
-
-
-
-
         Log.d(TAG, "#" + position);
 
-
-
-
-
         }Log.d("onBindViewHolder", "onBindViewHolder"+ position);
-
-        //final String TRAILER_BASE = "http://image.tmdb.org/t/p/";
-
-        //image size on recyclerView, not in the MovieDetail page!
-        //final String IMAGE_SIZE = "w342";
-
-        //String IMAGE_URL = mCursor.getString(MainActivity.INDEX_POSTER_PATH);
-        //Log.d(TAG, "url" + IMAGE_URL);
-        //String url = IMAGE_BASE + IMAGE_SIZE + IMAGE_URL;
 
     }
 

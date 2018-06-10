@@ -33,6 +33,10 @@ public final class MovieDatabaseJsonUtils {
     final static String MOVIE_TRAILER_TYPE = "type";
     final static String MOVIE_TRAILER_COUNT = "count";
 
+    final static String MOVIE_REVIEW_AUTHOR = "author";
+    final static String MOVIE_REVIEW_CONTENT = "content";
+    final static String MOVIE_REVIEW_URL = "url";
+
     //public static List<String> trailer_Keys = new ArrayList<String>();
 
 
@@ -60,17 +64,82 @@ public final class MovieDatabaseJsonUtils {
         return moviesArray;
     }
 
-    public static ContentValues getContentValueTrailerData (Context context, String movieJsonStr)
+    public static ContentValues getContentValueReviewData (Context context, String movieJsonStr)
             throws JSONException {
 
-        JSONObject movieData = new JSONObject(movieJsonStr);
+        JSONObject reviewData = new JSONObject(movieJsonStr);
 
         // check for an error
         //if (movieData.has())
 
-        JSONArray results = movieData.getJSONArray(RESULTS);
+        JSONArray results = reviewData.getJSONArray(RESULTS);
         //Log.d(TAG, results.getJSONObject(0).getString("key"));
-        List<String> trailerKeys = new ArrayList<String>();
+        //List<String> trailerKeys = new ArrayList<String>();
+
+
+        ContentValues reviewContentValues = new ContentValues();
+        //results.length gets the amount of reviews....
+        for(int i = 0; i < results.length(); i++){
+
+            String author;
+            String content;
+            String url;
+
+            // get current JSON object
+             JSONObject currentReview = results.getJSONObject(i);
+
+            //extract movie details from current JSON object
+            author = currentReview.getString(MOVIE_REVIEW_AUTHOR);
+            content = currentReview.getString(MOVIE_REVIEW_CONTENT);
+            url = currentReview.getString(MOVIE_REVIEW_URL);
+
+            Log.v(TAG, author);
+            ContentValues reviewSpecifics = new ContentValues();
+            reviewSpecifics.put(MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR, author);
+            reviewSpecifics.put(MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT, content);
+            reviewSpecifics.put(MovieContract.MovieEntry.COLUMN_REVIEW_URL, url);
+
+            reviewContentValues = reviewSpecifics;
+        }
+
+        return reviewContentValues;
+    }
+
+    public static ArrayList<MovieData> getMovieTrailerData(String json) throws JSONException {
+
+
+        JSONObject movieTrailerData = new JSONObject(json);
+        JSONArray results = movieTrailerData.getJSONArray(RESULTS);
+
+        ArrayList<MovieData> movieTrailerArray = new ArrayList<MovieData>();
+
+        for(int i = 0; i < results.length(); i++){
+            JSONObject currentMovie = results.getJSONObject(i);
+            MovieData trailerData = new MovieData(
+                    currentMovie.getString(ORIGINAL_TITLE),
+                    currentMovie.getString(POSTER_PATH),
+                    currentMovie.getString(VOTE_AVERAGE),
+                    currentMovie.getString(RELEASE_DATE),
+                    currentMovie.getString(OVERVIEW)
+            );
+            movieTrailerArray.add(trailerData);
+            //Log.v(TAG, moviesArray.get(i).getPoster_path());
+        }
+
+        return movieTrailerArray;
+    }
+
+    public static ContentValues getContentValueTrailerData (Context context, String trailerJsonStr)
+            throws JSONException {
+
+        JSONObject trailerData = new JSONObject(trailerJsonStr);
+
+        // check for an error
+        //if (movieData.has())
+
+        JSONArray results = trailerData.getJSONArray(RESULTS);
+        //Log.d(TAG, results.getJSONObject(0).getString("key"));
+        ArrayList<String> trailerKeys = new ArrayList<String>();
 
 
         ContentValues trailerContentValues = new ContentValues();
@@ -112,16 +181,16 @@ public final class MovieDatabaseJsonUtils {
         return trailerContentValues;
     }
 
-    public static ContentValues[] getContentValueMovieData (Context context, String trailerJsonStr)
+    public static ContentValues[] getContentValueMovieData (Context context, String movieJsonStr)
             throws JSONException {
 
-        JSONObject trailerData
-                = new JSONObject(trailerJsonStr);
+        JSONObject moviesData
+                = new JSONObject(movieJsonStr);
 
         // check for an error
         //if (movieData.has())
 
-        JSONArray results = trailerData.getJSONArray(RESULTS);
+        JSONArray results = moviesData.getJSONArray(RESULTS);
         ContentValues[] movieContentValues = new ContentValues[results.length()];
 
         for(int i = 0; i < results.length(); i++){

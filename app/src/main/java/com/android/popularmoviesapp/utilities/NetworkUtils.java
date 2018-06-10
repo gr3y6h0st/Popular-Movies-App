@@ -17,7 +17,7 @@ public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     //insert your own API KEY
-    private static final String API_KEY = "INSERT API KEY HERE";
+    private static final String API_KEY = "d007ef5c4dbd99564479e983302e350a";
 
 
     private static final String STATIC_MOVIE_DATABASE_URL =
@@ -31,9 +31,11 @@ public class NetworkUtils {
 
     private static final String VIDEO_PATH = "videos";
 
+    private static final String REVIEW_PATH = "reviews";
+
+
     private static String MOVIE_ID;
 
-    private static String REVIEW_PATH = "reviews";
 
     //default value as popular
     private static String SORT_ORDER = "popular";
@@ -74,7 +76,7 @@ public class NetworkUtils {
 
     public static URL reviewsBuildUrl (Context context){
         Uri builtUri = Uri.parse(MOVIEDB_BASE_URL + MOVIE_ID).buildUpon()
-                .appendPath(VIDEO_PATH)
+                .appendPath(REVIEW_PATH)
                 .appendQueryParameter(APPID_PARAM, API_KEY)
                 .build();
 

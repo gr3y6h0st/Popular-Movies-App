@@ -167,6 +167,7 @@ public class MovieProvider extends ContentProvider{
                         null,
                         null);
                 break;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -185,7 +186,7 @@ public class MovieProvider extends ContentProvider{
         if(null ==  selection) selection = "1";
         switch (sUriMatcher.match(uri)) {
             case CODE_MOVIE:
-                //selectionArgs[0] = NetworkUtils.getMovieId();
+                selectionArgs[0] = NetworkUtils.getMovieId();
                 rowsUpdated = mOpenHelper.getWritableDatabase().update(
                         MovieContract.MovieEntry.TABLE_NAME,
                         contentValues,

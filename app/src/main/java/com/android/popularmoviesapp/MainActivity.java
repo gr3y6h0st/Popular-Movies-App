@@ -21,6 +21,7 @@ import android.view.View;
 
 import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.sync.MovieInfoSyncIntentService;
+import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.android.popularmoviesapp.sync.MovieTrailerIntentService;
 import com.android.popularmoviesapp.utilities.NetworkUtils;
 
@@ -156,6 +157,9 @@ public class MainActivity extends AppCompatActivity implements
 
         Intent syncMovieTrailer = new Intent(this, MovieTrailerIntentService.class);
         startService(syncMovieTrailer);
+
+        Intent syncMovieReview = new Intent(this, MovieReviewIntentService.class);
+        startService(syncMovieReview);
 
         Intent intentToStartMovieDetailActivity = new Intent(MainActivity.this, MovieDetailActivity.class);
         Uri movieClicked = MovieContract.MovieEntry.buildMovieDetailPageUri(movie_id);

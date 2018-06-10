@@ -17,4 +17,8 @@
     <string name="md_synopsis_label">Synopsis:</string>
     <string name="action_movie_details_label">Movie Details</string>
     <string name="No_trailer_text">No Trailer available at this time.</string>
+    <string name="No_Review_Text">No Reviews Available</string>
+    <string name="Cursor_is_null_adapter">CURSOR IS NULL</string>
+    <string name="md_trailer_label">Trailers:</string>
+    <string name="md_review_label">Reviews:</string>
 </resources>
