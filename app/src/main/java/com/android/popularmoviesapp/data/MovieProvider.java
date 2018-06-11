@@ -197,7 +197,7 @@ public class MovieProvider extends ContentProvider{
 
 
             case CODE_MOVIE_DETAIL:
-                String[] selectionArguments = {uri.getLastPathSegment()};
+                //String[] selectionArguments = {uri.getLastPathSegment()};
 
                 //UPDATE to the column that matches MOVIE_ID (found in URI)
                 rowsUpdated = mOpenHelper.getWritableDatabase().update(

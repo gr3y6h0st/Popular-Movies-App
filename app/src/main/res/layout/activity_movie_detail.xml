@@ -205,6 +205,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/md_plot_synopsis" />
 
+
             <RelativeLayout
                 android:id="@+id/md_trailers_relative_layout"
                 android:layout_width="match_parent"
@@ -224,11 +225,13 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:text="@string/md_trailer_label"
-                    android:textSize="24sp"
-                    android:typeface="serif"
+                    android:textAppearance="@style/TextAppearance.AppCompat"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:typeface="monospace"
                     android:visibility="visible"
                     app:fontFamily="sans-serif"
-                    tools:text="Movie Trailers:" />
+                    tools:text="Trailers:" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/md_trailers_rv"
@@ -242,6 +245,22 @@
                     android:layout_marginTop="8dp"
                     android:visibility="visible" />
             </RelativeLayout>
+
+            <View
+                android:id="@+id/md_div_trailers_reviews"
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@android:color/black"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/md_trailers_relative_layout" />
 
 
             <RelativeLayout
@@ -264,8 +283,10 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:text="@string/md_review_label"
-                    android:textSize="24sp"
-                    android:typeface="serif"
+                    android:textAppearance="@style/TextAppearance.AppCompat"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:typeface="monospace"
                     android:visibility="visible"
                     app:fontFamily="sans-serif"
                     tools:text="Reviews: " />
@@ -280,6 +301,8 @@
                     android:layout_marginRight="16dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp" />
+
+                    
             </RelativeLayout>
 
 

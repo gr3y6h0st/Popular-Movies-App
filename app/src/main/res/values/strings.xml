@@ -21,4 +21,5 @@
     <string name="Cursor_is_null_adapter">CURSOR IS NULL</string>
     <string name="md_trailer_label">Trailers:</string>
     <string name="md_review_label">Reviews:</string>
+    <string name="md_review_read_more_url_text">Read More</string>
 </resources>

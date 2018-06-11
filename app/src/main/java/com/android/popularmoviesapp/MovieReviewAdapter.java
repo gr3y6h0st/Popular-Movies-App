@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,11 +47,13 @@ public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.
      */
     public class MovieDetailHolder extends RecyclerView.ViewHolder {
         private final TextView listReviewView;
+        private final TextView listReviewUrlView;
         //Constructor for ViewHolder, references TextViews and sets onClickListener to listen for clicks
         //via onClick method.
         public MovieDetailHolder(View view){
             super(view);
             listReviewView = (TextView) view.findViewById(R.id.movie_review_tv);
+            listReviewUrlView = (TextView) view.findViewById(R.id.md_review_url);
             //view.setOnClickListener(this);
             //Call setOnClickListener to the View passed into constructor
             /*listReviewView.setOnClickListener(new View.OnClickListener() {
@@ -99,6 +103,7 @@ public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.
 
         if(mCursor == null){
             holder.listReviewView.setText(mContext.getString(R.string.Cursor_is_null_adapter));
+            holder.listReviewUrlView.setVisibility(View.INVISIBLE);
         }
          else {
             mCursor.moveToPosition(position);
@@ -108,10 +113,17 @@ public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.
              **/
 
             String review_content = mCursor.getString(MovieDetailActivity.INDEX_REVIEW_CONTENT);
+            String review_url = "<a href=" + mCursor.getString(MovieDetailActivity.INDEX_REVIEW_URL) + ">READ MORE</a>";
+            //<a href="http://www.stackoverflow.com">stackoverflow.com</a>
             if (review_content != null) {
+
                 holder.listReviewView.setText(review_content);
+                holder.listReviewUrlView.setVisibility(View.VISIBLE);
+                holder.listReviewUrlView.setMovementMethod(LinkMovementMethod.getInstance());
+                holder.listReviewUrlView.setText(Html.fromHtml(review_url));
             } else {
                 holder.listReviewView.setText(no_reviews_available);
+                holder.listReviewUrlView.setVisibility(View.INVISIBLE);
             }
         //move cursor to appropriate position
         Log.d(TAG, "#" + position);
