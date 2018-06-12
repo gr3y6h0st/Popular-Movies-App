@@ -17,7 +17,7 @@ public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     //insert your own API KEY
-    private static final String API_KEY = "d007ef5c4dbd99564479e983302e350a";
+    private static final String API_KEY = BuildConfig.MY_MOVIE_DB_API_KEY;
 
 
     private static final String STATIC_MOVIE_DATABASE_URL =
