@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@android:color/black">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -11,61 +12,63 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="visible"
             tools:context=".MovieDetailActivity">
 
-
             <ImageView
-                android:id="@+id/movie_detail_iv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:scaleType="fitCenter"
+                android:id="@+id/movie_detail_backdrop_iv"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:paddingBottom="16dp"
+                app:layout_constraintBottom_toTopOf="@id/iv_guideline"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="ContentDescription" />
 
-            <TextView
-                android:id="@+id/md_original_title_label"
+            <android.support.constraint.Guideline
+                android:id="@+id/iv_guideline"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.33" />
+
+            <ImageView
+                android:id="@+id/movie_detail_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
                 android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:text="@string/md_original_title_label"
-                android:textAppearance="@style/TextAppearance.AppCompat"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:typeface="monospace"
-                app:fontFamily="sans-serif"
+                android:background="@color/gray_900"
+                app:layout_constraintBottom_toTopOf="@+id/iv_guideline"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/md_vote_avg" />
+                app:layout_constraintTop_toTopOf="@id/iv_guideline"
+                app:layout_constraintVertical_bias="1.0"
+                app:srcCompat="@mipmap/ic_launcher_round"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:id="@+id/md_original_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
                 android:textStyle="italic"
                 android:typeface="monospace"
                 app:fontFamily="sans-serif"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_guideline"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/md_original_title_label"
-                app:layout_constraintTop_toBottomOf="@+id/md_vote_avg"
+                app:layout_constraintStart_toEndOf="@+id/movie_detail_iv"
+                app:layout_constraintTop_toBottomOf="@id/iv_guideline"
                 tools:text="@tools:sample/lorem" />
 
             <TextView
@@ -73,53 +76,57 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:layout_marginLeft="16dp"
                 android:layout_marginRight="8dp"
-                android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/md_date_label"
                 android:textAppearance="@style/TextAppearance.AppCompat"
-                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:typeface="monospace"
                 app:fontFamily="sans-serif"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/md_original_title"
                 app:layout_constraintTop_toBottomOf="@+id/md_original_title" />
 
             <TextView
                 android:id="@+id/md_release_date"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
+                android:layout_marginBottom="8dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/gray_400"
                 android:textSize="14sp"
                 android:typeface="monospace"
                 app:fontFamily="sans-serif"
+                app:layout_constraintBottom_toBottomOf="@+id/md_release_date_label"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/md_release_date_label"
+                app:layout_constraintStart_toEndOf="@+id/md_release_date_label"
+                app:layout_constraintTop_toTopOf="@+id/md_release_date_label"
                 tools:text="2012-04-25" />
 
             <TextView
                 android:id="@+id/md_vote_avg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textSize="24sp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/gray_400"
+                android:textSize="16sp"
                 android:textStyle="bold|italic"
                 android:typeface="monospace"
                 app:fontFamily="sans-serif"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.08"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/md_vote_avg_label"
-                app:layout_constraintTop_toBottomOf="@+id/movie_detail_iv"
+                app:layout_constraintTop_toTopOf="@+id/md_vote_avg_label"
                 tools:text="5.0" />
 
             <TextView
@@ -127,19 +134,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:layout_marginLeft="16dp"
                 android:layout_marginRight="8dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/md_rating_label"
-                android:textSize="24sp"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:typeface="monospace"
                 app:fontFamily="sans-serif"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.334"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/movie_detail_iv" />
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/md_release_date_label"
+                app:layout_constraintTop_toBottomOf="@+id/md_release_date_label" />
 
             <TextView
                 android:id="@+id/md_plot_synopsis_label"
@@ -149,17 +156,18 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/md_synopsis_label"
                 android:textAppearance="@style/TextAppearance.AppCompat"
-                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:typeface="monospace"
                 app:fontFamily="sans-serif"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/md_release_date" />
+                app:layout_constraintTop_toBottomOf="@+id/movie_detail_iv" />
 
             <TextView
                 android:id="@+id/md_plot_synopsis"
@@ -171,6 +179,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
+                android:textColor="@color/gray_400"
                 android:textSize="18sp"
                 android:typeface="monospace"
                 app:fontFamily="sans-serif"
@@ -226,7 +235,8 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/md_trailer_label"
                     android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     android:typeface="monospace"
                     android:visibility="visible"
@@ -284,7 +294,8 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/md_review_label"
                     android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     android:typeface="monospace"
                     android:visibility="visible"
@@ -302,7 +313,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp" />
 
-                    
+
             </RelativeLayout>
 
 

@@ -35,6 +35,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
             MovieContract.MovieEntry.COLUMN_TITLE,
             MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
             MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
@@ -49,17 +50,18 @@ public class MovieDetailActivity extends AppCompatActivity implements
     public static final int INDEX_MOVIE_TITLE = 0;
     public static final int INDEX_MOVIE_VOTE_AVERAGE = 1;
     public static final int INDEX_MOVIE_POSTER_PATH = 2;
-    public static final int INDEX_MOVIE_RELEASE_DATE = 3;
-    public static final int INDEX_MOVIE_OVERVIEW = 4;
-    public static final int INDEX_MOVIE_ID = 5;
+    public static final int INDEX_MOVIE_BACKDROP_PATH = 3;
+    public static final int INDEX_MOVIE_RELEASE_DATE = 4;
+    public static final int INDEX_MOVIE_OVERVIEW = 5;
+    public static final int INDEX_MOVIE_ID = 6;
 
-    public static final int INDEX_TRAILER_KEY = 6;
-    public static final int INDEX_TRAILER_TYPE = 7;
-    public static final int INDEX_TRAILER_NAME = 8;
+    public static final int INDEX_TRAILER_KEY = 7;
+    public static final int INDEX_TRAILER_TYPE = 8;
+    public static final int INDEX_TRAILER_NAME = 9;
 
-    public static final int INDEX_REVIEW_AUTHOR = 9;
-    public static final int INDEX_REVIEW_CONTENT = 10;
-    public static final int INDEX_REVIEW_URL = 11;
+    public static final int INDEX_REVIEW_AUTHOR = 10;
+    public static final int INDEX_REVIEW_CONTENT = 11;
+    public static final int INDEX_REVIEW_URL = 12;
 
     private static final int ID_MOVIE_DETAIL_LOADER = 519;
 
@@ -177,6 +179,8 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
         String moviePoster = data.getString(INDEX_MOVIE_POSTER_PATH);
 
+        String movieBackdrop = data.getString(INDEX_MOVIE_BACKDROP_PATH);
+
         String movieOverview = data.getString(INDEX_MOVIE_OVERVIEW);
 
         String movieReleaseDate = data.getString(INDEX_MOVIE_RELEASE_DATE);
@@ -197,24 +201,29 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
 
 
-        //create the image url for poster
+        //create the image url for poster and backdrop
         final String IMAGE_BASE = "http://image.tmdb.org/t/p/";
-        final String IMAGE_SIZE = "w500";
-        //obtain poster path from MovieData object
-        String IMAGE_URL = moviePoster;
+        final String IMAGE_SIZE_W500 = "w500";
+        final String IMAGE_SIZE_ORIGINAL = "original";
 
-        String url = IMAGE_BASE + IMAGE_SIZE + IMAGE_URL;
+        //obtain poster path from MovieData object
+        String POSTER_IMAGE_URL = moviePoster;
+        String BACKDROP_IMAGE_URL = movieBackdrop;
+
+        String poster_url = IMAGE_BASE + IMAGE_SIZE_W500 + POSTER_IMAGE_URL;
+        String backdrop_url = IMAGE_BASE + IMAGE_SIZE_ORIGINAL + BACKDROP_IMAGE_URL;
         //output the url into Log for debug purposes
         //Log.d(TAG, trailer_KEY);
         //use Picasso to place url image into imageview
-        Picasso.get().load(url).into(mDetailBinding.movieDetailIv);
+        Picasso.get().load(poster_url).into(mDetailBinding.movieDetailIv);
+        Picasso.get().load(backdrop_url).into(mDetailBinding.movieDetailBackdropIv);
 
         mDetailBinding.mdOriginalTitle.setText(movieTitle);
         mDetailBinding.mdVoteAvg.setText(movieRating);
         mDetailBinding.mdReleaseDate.setText(movieReleaseDate);
         mDetailBinding.mdPlotSynopsis.setText(movieOverview);
 
-        mDetailBinding.mdOriginalTitleLabel.setText(getString(R.string.md_original_title_label));
+        //mDetailBinding.mdOriginalTitleLabel.setText(getString(R.string.md_original_title_label));
         mDetailBinding.mdPlotSynopsisLabel.setText(getString(R.string.md_synopsis_label));
         mDetailBinding.mdReleaseDateLabel.setText(getString(R.string.md_date_label));
         mDetailBinding.mdVoteAvgLabel.setText(getString(R.string.md_rating_label));

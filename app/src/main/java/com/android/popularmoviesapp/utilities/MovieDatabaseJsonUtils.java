@@ -23,6 +23,7 @@ public final class MovieDatabaseJsonUtils {
     final static String OVERVIEW = "overview";
     final static String RELEASE_DATE = "release_date";
     final static String POSTER_PATH = "poster_path";
+    final static String BACKDROP_PATH = "backdrop_path";
     final static String VOTE_AVERAGE = "vote_average";
     final static String MOVIE_ID = "id";
 
@@ -197,6 +198,7 @@ public final class MovieDatabaseJsonUtils {
 
             String original_title;
             String posterPath;
+            String backdropPath;
             String overview;
             String voteAverage;
             String releaseDate;
@@ -208,6 +210,7 @@ public final class MovieDatabaseJsonUtils {
             //extract movie details from current JSON object
             original_title = currentMovie.getString(ORIGINAL_TITLE);
             posterPath = currentMovie.getString(POSTER_PATH);
+            backdropPath = currentMovie.getString(BACKDROP_PATH);
             overview = currentMovie.getString(OVERVIEW);
             voteAverage = currentMovie.getString(VOTE_AVERAGE);
             releaseDate = currentMovie.getString(RELEASE_DATE);
@@ -216,6 +219,7 @@ public final class MovieDatabaseJsonUtils {
             ContentValues movieSpecifics = new ContentValues();
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_TITLE, original_title);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, backdropPath);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, voteAverage);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);

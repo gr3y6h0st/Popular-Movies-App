@@ -107,17 +107,19 @@ public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.
         }
          else {
             mCursor.moveToPosition(position);
-
-            /**
-             * change code to reflect MOVIE AUTHOR
-             **/
-
             String review_content = mCursor.getString(MovieDetailActivity.INDEX_REVIEW_CONTENT);
+
+
+            /** Credit for hyperlink code in listview to: emmby from Stack Overflow.
+             * Source: https://stackoverflow.com/questions/1697908/android-how-can-i-add-html-links-inside-a-listview
+             * Creates a link using the review url taken from the MovieDataBase.
+             */
             String review_url = "<a href=" + mCursor.getString(MovieDetailActivity.INDEX_REVIEW_URL) + ">READ MORE</a>";
-            //<a href="http://www.stackoverflow.com">stackoverflow.com</a>
+            Log.v(TAG, review_url);
             if (review_content != null) {
 
                 holder.listReviewView.setText(review_content);
+                holder.listReviewView.setTextColor(mContext.getResources().getColor(R.color.gray_400));
                 holder.listReviewUrlView.setVisibility(View.VISIBLE);
                 holder.listReviewUrlView.setMovementMethod(LinkMovementMethod.getInstance());
                 holder.listReviewUrlView.setText(Html.fromHtml(review_url));

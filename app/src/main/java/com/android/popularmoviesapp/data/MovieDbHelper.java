@@ -23,6 +23,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                 "CREATE TABLE " + MovieContract.MovieEntry.TABLE_NAME + " (" +
                         MovieContract.MovieEntry.COLUMN_TITLE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_POSTER_PATH + " TEXT, " +
+                        MovieContract.MovieEntry.COLUMN_BACKDROP_PATH + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_RELEASE_DATE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_OVERVIEW + " TEXT, " +
