@@ -1,5 +1,7 @@
 package com.android.popularmoviesapp;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -15,14 +17,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.databinding.DataBindingUtil;
-import android.view.View;
 
 import com.android.popularmoviesapp.databinding.ActivityMovieDetailBinding;
 
 import com.android.popularmoviesapp.data.MovieContract;
+import com.android.popularmoviesapp.sync.FavoritesMovieIntentService;
 import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.squareup.picasso.Picasso;
 
@@ -66,6 +70,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
     private static final int ID_MOVIE_DETAIL_LOADER = 519;
 
     private Uri mUri;
+    private Cursor mCursor;
 
     private ActivityMovieDetailBinding mDetailBinding;
 
@@ -90,6 +95,8 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
         mDetailBinding = DataBindingUtil.setContentView(this,
                 R.layout.activity_movie_detail);
+
+        //Toolbar movieDetailToolbar = (Toolbar) findViewById(R.id.md_toolbar);
 
         RecyclerView.LayoutManager layoutTrailerManager =
                 new LinearLayoutManager(this);
@@ -126,11 +133,58 @@ public class MovieDetailActivity extends AppCompatActivity implements
     //will set BACK BUTTON to navigate back to previous activity w/o recreating it.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if( id == android.R.id.home) {
-            NavUtils.navigateUpFromSameTask(this);
+        int itemClicked = item.getItemId();
+        Context context = MovieDetailActivity.this;
+
+        switch (itemClicked) {
+            case R.id.favorite_movie_action_button:
+
+                String movieTitle = mCursor.getString(INDEX_MOVIE_TITLE);
+
+                String moviePoster = mCursor.getString(INDEX_MOVIE_POSTER_PATH);
+
+                String movieBackdrop = mCursor.getString(INDEX_MOVIE_BACKDROP_PATH);
+
+                String movieOverview = mCursor.getString(INDEX_MOVIE_OVERVIEW);
+
+                String movieReleaseDate = mCursor.getString(INDEX_MOVIE_RELEASE_DATE);
+
+                String movieRating = mCursor.getString(INDEX_MOVIE_VOTE_AVERAGE);
+
+                String movie_ID = mCursor.getString(INDEX_MOVIE_ID);
+
+                String trailer_type = mCursor.getString(INDEX_TRAILER_TYPE);
+
+
+                String movieTrailerName = mCursor.getString(INDEX_TRAILER_NAME);
+
+                String movieReviewAuthor = mCursor.getString(INDEX_REVIEW_AUTHOR);
+                //Log.v( TAG, movieReviewAuthor);
+
+                final String trailer_KEY = mCursor.getString(INDEX_TRAILER_KEY);
+
+                Intent addFavoriteMovie = new Intent(this, FavoritesMovieIntentService.class);
+                addFavoriteMovie.putExtra("movieTitle", movieTitle);
+                addFavoriteMovie.putExtra("moviePoster", moviePoster);
+                addFavoriteMovie.putExtra("movieOverview", movieOverview);
+                addFavoriteMovie.putExtra("movieReleaseDate", movieReleaseDate);
+                addFavoriteMovie.putExtra("movieRating", movieRating);
+                addFavoriteMovie.putExtra("movie_ID", movie_ID);
+                addFavoriteMovie.putExtra("trailer_type", trailer_type);
+                addFavoriteMovie.putExtra("movieTrailerName", movieTrailerName);
+                addFavoriteMovie.putExtra("movieReviewAuthor", movieReviewAuthor);
+                addFavoriteMovie.putExtra("trailer_KEY", trailer_KEY);
+
+                startService(addFavoriteMovie);
+
+                return true;
+
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @NonNull
@@ -155,6 +209,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+        mCursor = data;
         mTrailerAdapter.swapCursor(data);
         mReviewAdapter.swapCursor(data);
 
@@ -234,4 +289,12 @@ public class MovieDetailActivity extends AppCompatActivity implements
         mTrailerAdapter.swapCursor(null);
         mReviewAdapter.swapCursor(null);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movie_detail_menu, menu);
+        return true;
+    }
+
+
 }

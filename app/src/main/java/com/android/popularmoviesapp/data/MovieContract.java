@@ -29,7 +29,15 @@ public class MovieContract {
                     .build();
         }
 
-        public static final String TABLE_NAME = "movie_data";
+        public static Uri buildFavoriteMovieUri(){
+            return CONTENT_URI.buildUpon()
+                    .appendPath("favorite")
+                    .build();
+        }
+
+        public static final String TABLE_NAME_MOVIE_MAIN = "movie_data";
+        public static final String TABLE_NAME_FAVORITES = "favorites_data";
+
         public static final String COLUMN_TITLE = "original_title";
         public static final String COLUMN_POSTER_PATH = "poster_path";
         public static final String COLUMN_BACKDROP_PATH = "backdrop_path";

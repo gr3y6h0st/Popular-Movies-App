@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements
     //public static final int INDEX_COLUMN_TRAILER_KEY = 6;
 
     public static final int ID_MOVIE_LOADER = 19;
+    public static final int ID_FAVORITES_LOADER = 400;
 
     private RecyclerView mMovieList;
     private MoviesAdapter mAdapter;
@@ -81,11 +82,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
-        startService(syncMovieInfo);
         setupMB();
-        getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
-
     }
 
     private void setupMB() {
@@ -110,15 +107,37 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void loadMovieSortPreference (SharedPreferences preferences) {
-        networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
-                getString(R.string.sort_default)));
+        String value = preferences.getString(getString(R.string.sort_key), getString(R.string.sort_favorite_movie_value));
+        switch (value) {
+            case "favorites":
+                getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
+
+                System.out.println(value);
+                break;
+            case "popular": {
+                networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
+                        getString(R.string.sort_most_popular_value)));
+                System.out.println(value);
+                Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+                startService(syncMovieInfo);
+
+                break;
+            }
+            default: {
+                networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
+                        getString(R.string.sort_default)));
+                System.out.println(value);
+                Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+                startService(syncMovieInfo);
+                break;
+            }
+        }
     }
 
     @NonNull
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int loaderId, @Nullable Bundle args) {
-        //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
-        //startService(syncMovieInfo);
+
         switch (loaderId) {
             case ID_MOVIE_LOADER:
 
@@ -130,10 +149,23 @@ public class MainActivity extends AppCompatActivity implements
                         null,
                         null,
                         null);
+
+            case ID_FAVORITES_LOADER:
+
+                Uri favoritesQueryUri = MovieContract.MovieEntry.buildFavoriteMovieUri();
+
+                return new android.support.v4.content.CursorLoader(this,
+                        favoritesQueryUri,
+                        MOVIE_DATA_ARRAY,
+                        null,
+                        null,
+                        null);
+
             default:
                 throw new RuntimeException("Loader not implemented: " + loaderId);
 
-        }    }
+        }
+    }
 
     @Override
     public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader, Cursor data) {
@@ -141,8 +173,8 @@ public class MainActivity extends AppCompatActivity implements
         if(mPosition == RecyclerView.NO_POSITION) mPosition = 0;
         mMovieList.smoothScrollToPosition(mPosition);
 
-        data.moveToFirst();
-        Log.v(TAG , DatabaseUtils.dumpCursorToString(data));
+        //data.moveToFirst();
+        //Log.v(TAG , DatabaseUtils.dumpCursorToString(data));
 
         //if(cursor.getCount() != 0)
     }
@@ -180,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
-        mAdapter.swapCursor(null);
+        //mAdapter.swapCursor(null);
 
     }
 

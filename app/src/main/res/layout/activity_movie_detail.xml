@@ -313,9 +313,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp" />
 
-
             </RelativeLayout>
-
 
         </android.support.constraint.ConstraintLayout>
 

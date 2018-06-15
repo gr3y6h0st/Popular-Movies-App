@@ -56,6 +56,9 @@
         <service
             android:name=".sync.MovieReviewIntentService"
             android:exported="false"/>
+        <service
+            android:name=".sync.FavoritesMovieIntentService"
+            android:exported="false"/>
 
     </application>
 

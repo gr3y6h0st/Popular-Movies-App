@@ -134,4 +134,7 @@ public class MovieInfo {
             e.printStackTrace();
         }
     }
+
+    public static void add_Favorite_Movie(Context context){
+    }
 }

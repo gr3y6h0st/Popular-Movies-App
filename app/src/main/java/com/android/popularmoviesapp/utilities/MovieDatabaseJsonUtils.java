@@ -182,6 +182,29 @@ public final class MovieDatabaseJsonUtils {
         return trailerContentValues;
     }
 
+    public static ContentValues getFavoriteContentValueData (Context context){
+
+        String original_title = MovieContract.MovieEntry.COLUMN_TITLE;
+        String posterPath = MovieContract.MovieEntry.COLUMN_POSTER_PATH;
+        String backdropPath = MovieContract.MovieEntry.COLUMN_BACKDROP_PATH;
+        String overview = MovieContract.MovieEntry.COLUMN_OVERVIEW;
+        String voteAverage = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE;
+        String releaseDate = MovieContract.MovieEntry.COLUMN_RELEASE_DATE;
+        String id  = MovieContract.MovieEntry.COLUMN_MOVIE_ID;
+
+
+        ContentValues favoriteData = new ContentValues();
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_TITLE, original_title);
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, backdropPath);
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,voteAverage);
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
+
+        return favoriteData;
+    }
+
     public static ContentValues[] getContentValueMovieData (Context context, String movieJsonStr)
             throws JSONException {
 
