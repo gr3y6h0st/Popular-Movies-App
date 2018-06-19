@@ -41,7 +41,7 @@ public final class MovieDatabaseJsonUtils {
     //public static List<String> trailer_Keys = new ArrayList<String>();
 
 
-    public static ArrayList<MovieData> getMovieData(String json) throws JSONException {
+    /*public static ArrayList<MovieData> getMovieData(String json) throws JSONException {
 
 
         JSONObject movieData = new JSONObject(json);
@@ -63,7 +63,7 @@ public final class MovieDatabaseJsonUtils {
         }
 
         return moviesArray;
-    }
+    }*/
 
     public static ContentValues getContentValueReviewData (Context context, String movieJsonStr)
             throws JSONException {
@@ -106,7 +106,7 @@ public final class MovieDatabaseJsonUtils {
         return reviewContentValues;
     }
 
-    public static ArrayList<MovieData> getMovieTrailerData(String json) throws JSONException {
+    /*public static ArrayList<MovieData> getMovieTrailerData(String json) throws JSONException {
 
 
         JSONObject movieTrailerData = new JSONObject(json);
@@ -128,7 +128,7 @@ public final class MovieDatabaseJsonUtils {
         }
 
         return movieTrailerArray;
-    }
+    }*/
 
     public static ContentValues getContentValueTrailerData (Context context, String trailerJsonStr)
             throws JSONException {

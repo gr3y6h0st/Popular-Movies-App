@@ -93,7 +93,7 @@ public class NetworkUtils {
     }
 
     public void setSortOrder (String sortOrder){
-        this.SORT_ORDER = sortOrder;
+        SORT_ORDER = sortOrder;
     }
 
     public static void setMovieID(String movie_id){

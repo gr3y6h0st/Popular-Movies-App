@@ -1,6 +1,7 @@
 package com.android.popularmoviesapp.data;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -22,6 +23,7 @@ public class MovieProvider extends ContentProvider{
     public static final int CODE_MOVIE = 100;
     public static final int CODE_MOVIE_DETAIL = 119;
     public static final int CODE_MOVIE_FAVORITE = 143;
+    public static final int CODE_MOVIE_UNFAVORITE = 144;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -36,6 +38,7 @@ public class MovieProvider extends ContentProvider{
         matcher.addURI(authority, MovieContract.PATH_MOVIES + "/#", CODE_MOVIE_DETAIL);
 
         matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite", CODE_MOVIE_FAVORITE );
+        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite/#", CODE_MOVIE_UNFAVORITE );
 
         return matcher;
 
@@ -207,6 +210,14 @@ public class MovieProvider extends ContentProvider{
                         null);
                 break;
 
+            case CODE_MOVIE_UNFAVORITE:
+                String id = uri.getLastPathSegment();
+                numRowsDeleted = mOpenHelper.getWritableDatabase().delete(
+                        MovieContract.MovieEntry.TABLE_NAME_FAVORITES,
+                        "id=?",
+                        new String[]{id});
+                break;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -238,7 +249,6 @@ public class MovieProvider extends ContentProvider{
             case CODE_MOVIE_DETAIL:
                 //String[] selectionArguments = {uri.getLastPathSegment()};
 
-                //UPDATE to the column that matches MOVIE_ID (found in URI)
                 rowsUpdated = mOpenHelper.getWritableDatabase().update(
                         MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         contentValues,
@@ -257,23 +267,24 @@ public class MovieProvider extends ContentProvider{
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        Uri retUri = null;
+        long _id;
+
 
         switch (sUriMatcher.match(uri)) {
 
             case CODE_MOVIE_FAVORITE:
 
-                final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 db.beginTransaction();
                 //insert into FAVORITE TABLE
-                long _id;
                 try {
                     _id = db.insert(MovieContract.MovieEntry.TABLE_NAME_FAVORITES, null, contentValues);
-
-
+                    
                     /* if _id == -1 means insertion failed */
                     if (_id != -1) {
                         //database has changed
-                        getContext().getContentResolver().notifyChange(uri, null);
+                        retUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, _id);
                         System.out.println("Successful insert!");
                     } else {
                         System.out.println("SORRY insert FAILED!");
@@ -283,12 +294,40 @@ public class MovieProvider extends ContentProvider{
                 } finally {
                     db.endTransaction();
 
+                    getContext().getContentResolver().notifyChange(uri, null);
                 }
+                break;
 
-                return MovieContract.MovieEntry.buildFavoriteMovieUri();
+                //return MovieContract.MovieEntry.buildFavoriteMovieUri();
+
+            case CODE_MOVIE:
+
+                db.beginTransaction();
+                //insert into FAVORITE TABLE
+                try {
+                    _id = db.insert(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN, null, contentValues);
+
+
+                    /* if _id == -1 means insertion failed */
+                    if (_id != -1) {
+                        //database has changed
+                        retUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, _id);
+                        System.out.println("Successful insert!");
+                    } else {
+                        System.out.println("SORRY insert FAILED!");
+                    }
+                    db.setTransactionSuccessful();
+
+                } finally {
+                    db.endTransaction();
+
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                break;
 
             default:
-                return null;
+                throw new UnsupportedOperationException("FAILED TO perform INSERT @ Unknown uri: " + uri);
         }
+        return retUri;
     }
 }

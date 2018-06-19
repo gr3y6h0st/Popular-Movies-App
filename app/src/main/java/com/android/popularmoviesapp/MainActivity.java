@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,7 +20,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+
 import com.android.popularmoviesapp.data.MovieContract;
+import com.android.popularmoviesapp.data.MovieDbHelper;
 import com.android.popularmoviesapp.sync.MovieInfoSyncIntentService;
 import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.android.popularmoviesapp.sync.MovieTrailerIntentService;
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private final String TAG = MainActivity.class.getSimpleName();
     private NetworkUtils networkUtils = new NetworkUtils();
+    private SQLiteDatabase mDb;
 
     public static final String[] MOVIE_DATA_ARRAY = {
             MovieContract.MovieEntry.COLUMN_TITLE,
@@ -39,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements
             MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
-            MovieContract.MovieEntry.COLUMN_MOVIE_ID
-            //MovieContract.MovieEntry.COLUMN_TRAILER_KEY
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL
     };
 
     public static final int INDEX_OG_TITLE = 0;
@@ -49,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int INDEX_RELEASE_DATE = 3;
     public static final int INDEX_OVERVIEW = 4;
     public static final int INDEX_COLUMN_MOVIE_ID = 5;
-    //public static final int INDEX_COLUMN_TRAILER_KEY = 6;
+    public static final int INDEX_FAV_BOOL = 6;
 
     public static final int ID_MOVIE_LOADER = 19;
     public static final int ID_FAVORITES_LOADER = 400;
@@ -75,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements
 
         mMovieList.setAdapter(mAdapter);
 
+        MovieDbHelper movieDbHelper = new MovieDbHelper(this);
+        mDb = movieDbHelper.getWritableDatabase();
+
         getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
 
     }
@@ -94,9 +101,9 @@ public class MainActivity extends AppCompatActivity implements
         //get values for shared preference
         loadMovieSortPreference(preferences);
 
-
         //set listener for changes in Preference data
-        preferences.registerOnSharedPreferenceChangeListener(this);
+        //preferences.registerOnSharedPreferenceChangeListener(this);
+
     }
 
     @Override
@@ -107,28 +114,59 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void loadMovieSortPreference (SharedPreferences preferences) {
-        String value = preferences.getString(getString(R.string.sort_key), getString(R.string.sort_favorite_movie_value));
+        String value = preferences.getString(getString(R.string.sort_key), getString(R.string.sort_default));
         switch (value) {
-            case "favorites":
-                getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
-
-                System.out.println(value);
-                break;
             case "popular": {
+                //getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
+
                 networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
                         getString(R.string.sort_most_popular_value)));
+
                 System.out.println(value);
+
                 Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
                 startService(syncMovieInfo);
+                getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
+                getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
 
                 break;
             }
+
+            case "favorites":
+                getSupportLoaderManager().destroyLoader(ID_MOVIE_LOADER);
+                getSupportLoaderManager().restartLoader(ID_FAVORITES_LOADER, null, this);
+
+
+                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_FAVORITES,
+                        null,
+                        null,
+                null,
+                    null,
+                    null,
+                    null);
+
+                mAdapter.swapCursor(cursor);
+
+                System.out.println(value);
+
+
+
+                break;
+
+
+
             default: {
                 networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
                         getString(R.string.sort_default)));
+
                 System.out.println(value);
+
                 Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+
                 startService(syncMovieInfo);
+                getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
+                getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
+
                 break;
             }
         }
@@ -173,8 +211,8 @@ public class MainActivity extends AppCompatActivity implements
         if(mPosition == RecyclerView.NO_POSITION) mPosition = 0;
         mMovieList.smoothScrollToPosition(mPosition);
 
-        //data.moveToFirst();
-        //Log.v(TAG , DatabaseUtils.dumpCursorToString(data));
+        data.moveToFirst();
+        Log.v(TAG , DatabaseUtils.dumpCursorToString(data));
 
         //if(cursor.getCount() != 0)
     }
@@ -194,6 +232,7 @@ public class MainActivity extends AppCompatActivity implements
         startService(syncMovieReview);
 
         Intent intentToStartMovieDetailActivity = new Intent(MainActivity.this, MovieDetailActivity.class);
+
         Uri movieClicked = MovieContract.MovieEntry.buildMovieDetailPageUri(movie_id);
 
         intentToStartMovieDetailActivity.setData(movieClicked);
@@ -212,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
-        //mAdapter.swapCursor(null);
+        mAdapter.swapCursor(null);
 
     }
 

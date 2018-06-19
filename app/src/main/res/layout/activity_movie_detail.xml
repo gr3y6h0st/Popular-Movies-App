@@ -13,7 +13,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="visible"
-            tools:context=".MovieDetailActivity">
+            tools:context=".MovieDetailActivity"
+            tools:ignore="ExtraText">
 
             <ImageView
                 android:id="@+id/movie_detail_backdrop_iv"
@@ -254,6 +255,8 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:visibility="visible" />
+
+
             </RelativeLayout>
 
             <View
@@ -314,6 +317,21 @@
                     android:layout_marginTop="8dp" />
 
             </RelativeLayout>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/favoriteFloatingActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                app:backgroundTint="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="@+id/md_release_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.8"
+                app:layout_constraintStart_toEndOf="@+id/md_release_date"
+                app:layout_constraintTop_toBottomOf="@+id/md_original_title"
+                app:rippleColor="@android:color/white"
+                android:focusable="true" />
+
 
         </android.support.constraint.ConstraintLayout>
 

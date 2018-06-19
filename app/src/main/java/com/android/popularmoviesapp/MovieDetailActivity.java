@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -22,11 +25,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.databinding.DataBindingUtil;
+import android.view.View;
+import android.widget.ImageButton;
 
+import com.android.popularmoviesapp.data.MovieData;
 import com.android.popularmoviesapp.databinding.ActivityMovieDetailBinding;
 
 import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.sync.FavoritesMovieIntentService;
+import com.android.popularmoviesapp.sync.MovieInfo;
 import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.squareup.picasso.Picasso;
 
@@ -48,7 +55,8 @@ public class MovieDetailActivity extends AppCompatActivity implements
             MovieContract.MovieEntry.COLUMN_TRAILER_NAME,
             MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR,
             MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT,
-            MovieContract.MovieEntry.COLUMN_REVIEW_URL
+            MovieContract.MovieEntry.COLUMN_REVIEW_URL,
+            MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL
     };
 
     public static final int INDEX_MOVIE_TITLE = 0;
@@ -66,11 +74,13 @@ public class MovieDetailActivity extends AppCompatActivity implements
     public static final int INDEX_REVIEW_AUTHOR = 10;
     public static final int INDEX_REVIEW_CONTENT = 11;
     public static final int INDEX_REVIEW_URL = 12;
+    public static final int INDEX_FAVORITE_BOOL = 13;
 
     private static final int ID_MOVIE_DETAIL_LOADER = 519;
 
     private Uri mUri;
     private Cursor mCursor;
+    private Context mContext = MovieDetailActivity.this;
 
     private ActivityMovieDetailBinding mDetailBinding;
 
@@ -81,6 +91,10 @@ public class MovieDetailActivity extends AppCompatActivity implements
     private MovieReviewAdapter mReviewAdapter;
 
     private int mPosition = RecyclerView.NO_POSITION;
+
+    private boolean checkFavorite = false;
+
+    FloatingActionButton favoriteFab;
 
     @Override
     protected void onStart() {
@@ -96,7 +110,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
         mDetailBinding = DataBindingUtil.setContentView(this,
                 R.layout.activity_movie_detail);
 
-        //Toolbar movieDetailToolbar = (Toolbar) findViewById(R.id.md_toolbar);
+        favoriteFab = mDetailBinding.favoriteFloatingActionButton;
 
         RecyclerView.LayoutManager layoutTrailerManager =
                 new LinearLayoutManager(this);
@@ -136,8 +150,9 @@ public class MovieDetailActivity extends AppCompatActivity implements
         int itemClicked = item.getItemId();
         Context context = MovieDetailActivity.this;
 
+
         switch (itemClicked) {
-            case R.id.favorite_movie_action_button:
+            /*case R.id.favorite_movie_action_button_on:
 
                 String movieTitle = mCursor.getString(INDEX_MOVIE_TITLE);
 
@@ -166,6 +181,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
                 Intent addFavoriteMovie = new Intent(this, FavoritesMovieIntentService.class);
                 addFavoriteMovie.putExtra("movieTitle", movieTitle);
                 addFavoriteMovie.putExtra("moviePoster", moviePoster);
+                addFavoriteMovie.putExtra("moveBackdrop", movieBackdrop);
                 addFavoriteMovie.putExtra("movieOverview", movieOverview);
                 addFavoriteMovie.putExtra("movieReleaseDate", movieReleaseDate);
                 addFavoriteMovie.putExtra("movieRating", movieRating);
@@ -178,6 +194,9 @@ public class MovieDetailActivity extends AppCompatActivity implements
                 startService(addFavoriteMovie);
 
                 return true;
+
+            case R.id.favorite_movie_action_button_off:
+                MovieInfo.remove_Favorite_Movie(context);*/
 
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
@@ -217,8 +236,10 @@ public class MovieDetailActivity extends AppCompatActivity implements
         mDetailBinding.mdTrailersRv.smoothScrollToPosition(mPosition);
         mDetailBinding.mdReviewsRv.smoothScrollToPosition(mPosition);
 
+
+
         //data.moveToFirst();
-        Log.v(TAG, DatabaseUtils.dumpCursorToString(data));
+        //Log.v(TAG, DatabaseUtils.dumpCursorToString(data));
 
         boolean cursorHadValidData = false;
         if (data != null && data.moveToFirst()) {
@@ -250,9 +271,79 @@ public class MovieDetailActivity extends AppCompatActivity implements
         String movieTrailerName = data.getString(INDEX_TRAILER_NAME);
 
         String movieReviewAuthor = data.getString(INDEX_REVIEW_AUTHOR);
-        //Log.v( TAG, movieReviewAuthor);
 
         final String trailer_KEY = data.getString(INDEX_TRAILER_KEY);
+
+        String is_favorite = data.getString(INDEX_FAVORITE_BOOL);
+        //this is where you get all ur information to start reading if MOVIES are FAVORITE.
+        Log.v( TAG, is_favorite);
+        final Boolean favorite_movie_bool = Boolean.parseBoolean(is_favorite);
+        if (favorite_movie_bool){
+            favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_on));
+        } else {
+            favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_off));
+        }
+
+        favoriteFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean setFavorite;
+
+                if (favorite_movie_bool) {
+                    favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_off));
+                    MovieInfo.remove_Favorite_Movie(mContext);
+
+                } else {
+                    setFavorite = !favorite_movie_bool;
+
+                    favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_on));
+
+                    String movieTitle = mCursor.getString(INDEX_MOVIE_TITLE);
+
+                    String moviePoster = mCursor.getString(INDEX_MOVIE_POSTER_PATH);
+
+                    String movieBackdrop = mCursor.getString(INDEX_MOVIE_BACKDROP_PATH);
+
+                    String movieOverview = mCursor.getString(INDEX_MOVIE_OVERVIEW);
+
+                    String movieReleaseDate = mCursor.getString(INDEX_MOVIE_RELEASE_DATE);
+
+                    String movieRating = mCursor.getString(INDEX_MOVIE_VOTE_AVERAGE);
+
+                    String movie_ID = mCursor.getString(INDEX_MOVIE_ID);
+
+                    String trailer_type = mCursor.getString(INDEX_TRAILER_TYPE);
+
+                    String movieTrailerName = mCursor.getString(INDEX_TRAILER_NAME);
+
+                    String movieReviewAuthor = mCursor.getString(INDEX_REVIEW_AUTHOR);
+                    //Log.v( TAG, movieReviewAuthor);
+
+                    final String trailer_KEY = mCursor.getString(INDEX_TRAILER_KEY);
+
+                    String addFavorite = String.valueOf(setFavorite);
+
+                    Intent addFavoriteMovie = new Intent(mContext, FavoritesMovieIntentService.class);
+
+                    addFavoriteMovie.putExtra("movieTitle", movieTitle);
+                    addFavoriteMovie.putExtra("moviePoster", moviePoster);
+                    addFavoriteMovie.putExtra("moveBackdrop", movieBackdrop);
+                    addFavoriteMovie.putExtra("movieOverview", movieOverview);
+                    addFavoriteMovie.putExtra("movieReleaseDate", movieReleaseDate);
+                    addFavoriteMovie.putExtra("movieRating", movieRating);
+                    addFavoriteMovie.putExtra("movie_ID", movie_ID);
+                    addFavoriteMovie.putExtra("trailer_type", trailer_type);
+                    addFavoriteMovie.putExtra("movieTrailerName", movieTrailerName);
+                    addFavoriteMovie.putExtra("movieReviewAuthor", movieReviewAuthor);
+                    addFavoriteMovie.putExtra("trailer_KEY", trailer_KEY);
+                    addFavoriteMovie.putExtra("favorite_movie", addFavorite);
+                    Log.v(TAG, addFavorite);
+
+                    startService(addFavoriteMovie);
+                }
+            }
+
+        });
 
 
 
@@ -270,7 +361,8 @@ public class MovieDetailActivity extends AppCompatActivity implements
         //output the url into Log for debug purposes
         //Log.d(TAG, trailer_KEY);
         //use Picasso to place url image into imageview
-        Picasso.get().load(poster_url).into(mDetailBinding.movieDetailIv);
+        Picasso.get()
+                .load(poster_url).into(mDetailBinding.movieDetailIv);
         Picasso.get().load(backdrop_url).into(mDetailBinding.movieDetailBackdropIv);
 
         mDetailBinding.mdOriginalTitle.setText(movieTitle);

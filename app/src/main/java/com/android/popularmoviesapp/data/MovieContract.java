@@ -56,5 +56,8 @@ public class MovieContract {
         public static final String COLUMN_REVIEW_CONTENT = "content";
         public static final String COLUMN_REVIEW_URL = "url";
 
+        public static final String COLUMN_FAVORITE_BOOL = "favorite";
+
+
     }
 }

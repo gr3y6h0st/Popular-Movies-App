@@ -12,18 +12,35 @@ public class MovieData implements Serializable{
     private String vote_average;
     private String release_date;
 
+    private String trailer_name;
+    private String trailer_key;
+    private String trailer_site;
+    private String trailer_id;
+    private String trailer_type;
+    private static boolean favorite_movie = false;
+
     /**
      * No args constructor, use in serialization
      */
     public MovieData() {
     }
 
-    public MovieData(String original_title, String poster_path, String overview, String vote_average, String release_date) {
-        this.original_title = original_title;
-        this.poster_path = poster_path;
-        this.overview = overview;
-        this.vote_average = vote_average;
-        this.release_date = release_date;
+    public MovieData(String name, String key, String site, String id, String type) {
+        this.trailer_name = name;
+        this.trailer_key = key;
+        this.trailer_site = site;
+        this.trailer_id = id;
+        this.trailer_type= type;
+    }
+
+    //trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_NAME, name);
+    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_KEY, key);
+    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_SITE, site);
+    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_ID, id);
+    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_TYPE, type);
+
+    public MovieData (boolean check_favorite_movie){
+        this.favorite_movie = favorite_movie;
     }
 
     public String getOriginal_title() {
@@ -64,5 +81,13 @@ public class MovieData implements Serializable{
 
     public void setRelease_date(String release_date) {
         this.release_date = release_date;
+    }
+
+    public boolean checkFavorite_movie() {
+        return favorite_movie;
+    }
+
+    public void setFavorite_movie(boolean new_fav_movie){
+        favorite_movie = new_fav_movie;
     }
 }

@@ -11,7 +11,6 @@ import com.android.popularmoviesapp.utilities.NetworkUtils;
 
 import java.net.URL;
 
-import static com.android.popularmoviesapp.utilities.NetworkUtils.getMovieId;
 import static com.android.popularmoviesapp.utilities.NetworkUtils.getResponseFromHttpUrl;
 
 public class MovieInfo {
@@ -137,4 +136,16 @@ public class MovieInfo {
 
     public static void add_Favorite_Movie(Context context){
     }
+
+    public static void remove_Favorite_Movie(Context context){
+        ContentResolver moviesContentResolver = context.getContentResolver();
+        moviesContentResolver.delete(
+                MovieContract.MovieEntry.CONTENT_URI.buildUpon()
+                        .appendPath("favorite")
+                        .appendPath(NetworkUtils.getMovieId())
+                        .build(),
+                null,
+                null);
+    }
+
 }

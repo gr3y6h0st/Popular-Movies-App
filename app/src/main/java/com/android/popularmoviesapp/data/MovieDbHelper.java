@@ -36,6 +36,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                         MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_REVIEW_URL + " TEXT, " +
+                        MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " TEXT DEFAULT 'false', " +
                         " UNIQUE (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
 
         final String SQL_CREATE_FAVORITE_MOVIES_TABLE =
@@ -55,6 +56,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                         MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_REVIEW_URL + " TEXT, " +
+                        MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " TEXT DEFAULT 'yikes', " +
                         " UNIQUE (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
 
         //execute SQL w/ execSQL method of SQL database obj
