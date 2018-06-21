@@ -23,6 +23,7 @@ import android.view.View;
 
 import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.data.MovieDbHelper;
+import com.android.popularmoviesapp.sync.MovieInfoQueryIntentService;
 import com.android.popularmoviesapp.sync.MovieInfoSyncIntentService;
 import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.android.popularmoviesapp.sync.MovieTrailerIntentService;
@@ -39,21 +40,38 @@ public class MainActivity extends AppCompatActivity implements
 
     public static final String[] MOVIE_DATA_ARRAY = {
             MovieContract.MovieEntry.COLUMN_TITLE,
-            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
             MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_TRAILER_KEY,
+            MovieContract.MovieEntry.COLUMN_TRAILER_TYPE,
+            MovieContract.MovieEntry.COLUMN_TRAILER_NAME,
+            MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR,
+            MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT,
+            MovieContract.MovieEntry.COLUMN_REVIEW_URL,
             MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL
     };
 
     public static final int INDEX_OG_TITLE = 0;
-    public static final int INDEX_POSTER_PATH = 1;
-    public static final int INDEX_VOTE_AVG = 2;
-    public static final int INDEX_RELEASE_DATE = 3;
-    public static final int INDEX_OVERVIEW = 4;
-    public static final int INDEX_COLUMN_MOVIE_ID = 5;
-    public static final int INDEX_FAV_BOOL = 6;
+    public static final int INDEX_VOTE_AVG = 1;
+    public static final int INDEX_POSTER_PATH = 2;
+    public static final int INDEX_BACKDROP_PATH = 3;
+    public static final int INDEX_RELEASE_DATE = 4;
+    public static final int INDEX_OVERVIEW = 5;
+    public static final int INDEX_COLUMN_MOVIE_ID = 6;
+
+    public static final int INDEX_TRAILER_KEY = 7;
+    public static final int INDEX_TRAILER_TYPE = 8;
+    public static final int INDEX_TRAILER_NAME = 9;
+
+    public static final int INDEX_REVIEW_AUTHOR = 10;
+    public static final int INDEX_REVIEW_CONTENT = 11;
+    public static final int INDEX_REVIEW_URL = 12;
+
+    public static final int INDEX_FAV_BOOL = 13;
 
     public static final int ID_MOVIE_LOADER = 19;
     public static final int ID_FAVORITES_LOADER = 400;
@@ -82,14 +100,18 @@ public class MainActivity extends AppCompatActivity implements
         MovieDbHelper movieDbHelper = new MovieDbHelper(this);
         mDb = movieDbHelper.getWritableDatabase();
 
-        getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
+        Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+        startService(syncMovieInfo);
 
+        getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
     }
 
     @Override
     protected void onStart() {
-        super.onStart();
         setupMB();
+
+        super.onStart();
+
     }
 
     private void setupMB() {
@@ -117,55 +139,96 @@ public class MainActivity extends AppCompatActivity implements
         String value = preferences.getString(getString(R.string.sort_key), getString(R.string.sort_default));
         switch (value) {
             case "popular": {
-                //getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
+
+                getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
+                getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
+
 
                 networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
                         getString(R.string.sort_most_popular_value)));
 
                 System.out.println(value);
 
-                Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
-                startService(syncMovieInfo);
-                getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
-                getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
+                //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+                //startService(syncMovieInfo);
+
+                Intent queryPopularMovieInfo = new Intent(this, MovieInfoQueryIntentService.class);
+                queryPopularMovieInfo.putExtra("query_type", value);
+                //send this to Intent service to decide whether to call popular query or Top Rated query.
+                startService(queryPopularMovieInfo);
+
+                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " ASC", "10");
+
+                cursor.close();
+
+                this.getContentResolver().notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);
 
                 break;
             }
 
-            case "favorites":
+            case "favorites": {
+
+
                 getSupportLoaderManager().destroyLoader(ID_MOVIE_LOADER);
                 getSupportLoaderManager().restartLoader(ID_FAVORITES_LOADER, null, this);
 
 
-                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_FAVORITES,
+                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                        new String[]{MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL},
+                        MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " = ? ",
+                        new String[]{"true"},
                         null,
                         null,
-                null,
-                    null,
-                    null,
-                    null);
+                        null);
 
-                mAdapter.swapCursor(cursor);
+                //mAdapter.swapCursor(cursor);
 
                 System.out.println(value);
-
+                cursor.close();
 
 
                 break;
+            }
 
 
 
-            default: {
+            case "top_rated": {
+
                 networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
-                        getString(R.string.sort_default)));
+                        getString(R.string.sort_highest_rated_value)));
 
                 System.out.println(value);
 
-                Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
 
-                startService(syncMovieInfo);
                 getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
-                getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
+                getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
+
+                //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+                //startService(syncMovieInfo);
+
+                Intent queryTopRatedMovieInfo = new Intent(this, MovieInfoQueryIntentService.class);
+
+                queryTopRatedMovieInfo.putExtra("query_type", value);
+                startService(queryTopRatedMovieInfo);
+
+                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
+
+                cursor.close();
+
+                this.getContentResolver().notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);
+
 
                 break;
             }
@@ -251,7 +314,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
-        mAdapter.swapCursor(null);
 
     }
 

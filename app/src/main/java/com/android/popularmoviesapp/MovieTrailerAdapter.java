@@ -58,7 +58,7 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
                     mCursor.moveToPosition(clickedPosition);
                     String trailer_key = mCursor.getString(MovieDetailActivity.INDEX_TRAILER_KEY);
 
-                    Log.d(TAG, trailer_key);
+                    //Log.d(TAG, trailer_key);
                     Intent openYTApp = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + trailer_key));
                     mContext.startActivity(openYTApp);
                 }
@@ -70,7 +70,7 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
     @Override
     public MovieDetailHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         mContext = viewGroup.getContext();
-        Log.d("onCreateViewHolder", "onCreateViewHolder Started");
+        //Log.d("onCreateViewHolder", "onCreateViewHolder Started");
 
         int layoutIdForListItem = R.layout.trailers_list_item;
         boolean shouldAttachToParentImmediately = false;
@@ -110,9 +110,9 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
                 holder.listTrailerView.setText(no_trailers_available);
             }
         //move cursor to appropriate position
-        Log.d(TAG, "#" + position);
+        //Log.d(TAG, "#" + position);
 
-        }Log.d("onBindViewHolder", "onBindViewHolder"+ position);
+        }//Log.d("onBindViewHolder", "onBindViewHolder"+ position);
 
         //final String TRAILER_BASE = "http://image.tmdb.org/t/p/";
 

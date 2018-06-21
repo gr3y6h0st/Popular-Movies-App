@@ -76,7 +76,7 @@ public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.
     @Override
     public MovieDetailHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         mContext = viewGroup.getContext();
-        Log.d("onCreateViewHolder", "onCreateViewHolder for REVIEW Started");
+       // Log.d("onCreateViewHolder", "onCreateViewHolder for REVIEW Started");
 
         int layoutIdForListItem = R.layout.reviews_list_item;
         boolean shouldAttachToParentImmediately = false;
@@ -115,7 +115,7 @@ public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.
              * Creates a link using the review url taken from the MovieDataBase.
              */
             String review_url = "<a href=" + mCursor.getString(MovieDetailActivity.INDEX_REVIEW_URL) + ">READ MORE</a>";
-            Log.v(TAG, review_url);
+            //Log.v(TAG, review_url);
             if (review_content != null) {
 
                 holder.listReviewView.setText(review_content);
@@ -128,9 +128,9 @@ public class MovieReviewAdapter extends RecyclerView.Adapter<MovieReviewAdapter.
                 holder.listReviewUrlView.setVisibility(View.INVISIBLE);
             }
         //move cursor to appropriate position
-        Log.d(TAG, "#" + position);
+        //Log.d(TAG, "#" + position);
 
-        }Log.d("onBindViewHolder", "onBindViewHolder"+ position);
+        }//Log.d("onBindViewHolder", "onBindViewHolder"+ position);
 
     }
 

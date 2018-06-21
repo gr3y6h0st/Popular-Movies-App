@@ -191,6 +191,7 @@ public final class MovieDatabaseJsonUtils {
         String voteAverage = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE;
         String releaseDate = MovieContract.MovieEntry.COLUMN_RELEASE_DATE;
         String id  = MovieContract.MovieEntry.COLUMN_MOVIE_ID;
+        String fav_bool = MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL;
 
 
         ContentValues favoriteData = new ContentValues();
@@ -201,6 +202,7 @@ public final class MovieDatabaseJsonUtils {
         favoriteData.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,voteAverage);
         favoriteData.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
         favoriteData.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
+        favoriteData.put(MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL, fav_bool);
 
         return favoriteData;
     }

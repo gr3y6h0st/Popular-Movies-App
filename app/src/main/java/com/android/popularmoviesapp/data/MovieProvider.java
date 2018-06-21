@@ -15,7 +15,7 @@ import android.widget.Toast;
 import com.android.popularmoviesapp.utilities.NetworkUtils;
 
 
-public class MovieProvider extends ContentProvider{
+public class MovieProvider extends ContentProvider {
 
     final String TAG = MovieProvider.class.getSimpleName();
 
@@ -37,8 +37,8 @@ public class MovieProvider extends ContentProvider{
         matcher.addURI(authority, MovieContract.PATH_MOVIES, CODE_MOVIE);
         matcher.addURI(authority, MovieContract.PATH_MOVIES + "/#", CODE_MOVIE_DETAIL);
 
-        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite", CODE_MOVIE_FAVORITE );
-        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite/#", CODE_MOVIE_UNFAVORITE );
+        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite", CODE_MOVIE_FAVORITE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite/#", CODE_MOVIE_UNFAVORITE);
 
         return matcher;
 
@@ -68,7 +68,8 @@ public class MovieProvider extends ContentProvider{
                         selectionArgs,
                         null,
                         null,
-                        null);
+                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE +" DESC",
+                        "40");
 
                 break;
 
@@ -92,13 +93,13 @@ public class MovieProvider extends ContentProvider{
             case CODE_MOVIE_FAVORITE:
 
                 cursor = mOpenHelper.getReadableDatabase().query(
-                        MovieContract.MovieEntry.TABLE_NAME_FAVORITES,
+                        MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         projection,
-                        selection,
-                        selectionArgs,
+                        MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " = ? ",
+                        new String[]{"true"},
                         null,
                         null,
-                    null);
+                        null);
 
                 break;
 
@@ -106,6 +107,7 @@ public class MovieProvider extends ContentProvider{
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
+        //getContext().getContentResolver().notifyChange(uri, null);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
@@ -121,7 +123,7 @@ public class MovieProvider extends ContentProvider{
     public int bulkInsert(@NonNull Uri uri, @Nullable ContentValues[] contentValues) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
-        switch (sUriMatcher.match(uri)){
+        switch (sUriMatcher.match(uri)) {
 
             case CODE_MOVIE:
                 db.beginTransaction();
@@ -130,7 +132,7 @@ public class MovieProvider extends ContentProvider{
                     for (ContentValues value : contentValues) {
 
                         long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN, null, value);
-                        if(_id != -1) {
+                        if (_id != -1) {
                             rowsInserted++;
                         }
                     }
@@ -139,7 +141,7 @@ public class MovieProvider extends ContentProvider{
                     db.endTransaction();
                 }
 
-                if(rowsInserted > 0) {
+                if (rowsInserted > 0) {
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
                 return rowsInserted;
@@ -182,7 +184,7 @@ public class MovieProvider extends ContentProvider{
                 } finally {
                     db.endTransaction();
                 }
-                if(trailerInfoRowsInserted > 0) {
+                if (trailerInfoRowsInserted > 0) {
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
                 return trailerInfoRowsInserted;
@@ -194,7 +196,7 @@ public class MovieProvider extends ContentProvider{
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         int numRowsDeleted = 0;
-        if(null == selection) selection = "1";
+        if (null == selection) selection = "1";
         switch (sUriMatcher.match(uri)) {
             case CODE_MOVIE:
                 numRowsDeleted = mOpenHelper.getWritableDatabase().delete(
@@ -202,7 +204,7 @@ public class MovieProvider extends ContentProvider{
                         null,
                         null);
                 break;
-            //case for CODE_MOVIE_DETAIL?!!!!
+
             case CODE_MOVIE_DETAIL:
                 numRowsDeleted = mOpenHelper.getWritableDatabase().delete(
                         MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
@@ -213,7 +215,7 @@ public class MovieProvider extends ContentProvider{
             case CODE_MOVIE_UNFAVORITE:
                 String id = uri.getLastPathSegment();
                 numRowsDeleted = mOpenHelper.getWritableDatabase().delete(
-                        MovieContract.MovieEntry.TABLE_NAME_FAVORITES,
+                        MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         "id=?",
                         new String[]{id});
                 break;
@@ -233,10 +235,12 @@ public class MovieProvider extends ContentProvider{
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
         int rowsUpdated = 0;
 
-        if(null ==  selection) selection = "1";
+        if (null == selection) selection = "1";
+        selectionArgs = new String[]{NetworkUtils.getMovieId()};
+
         switch (sUriMatcher.match(uri)) {
+
             case CODE_MOVIE:
-                selectionArgs[0] = NetworkUtils.getMovieId();
                 rowsUpdated = mOpenHelper.getWritableDatabase().update(
                         MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         contentValues,
@@ -256,9 +260,21 @@ public class MovieProvider extends ContentProvider{
                         selectionArgs
                 );
                 break;
+
+            case CODE_MOVIE_FAVORITE:
+
+                rowsUpdated = mOpenHelper.getWritableDatabase().update(
+                        MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                        contentValues,
+                        MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ",
+                        selectionArgs
+                );
+                break;
+
+
         }
-            if (rowsUpdated != 0) {
-                getContext().getContentResolver().notifyChange(uri, null);
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
 
         }
         return rowsUpdated;
@@ -279,35 +295,8 @@ public class MovieProvider extends ContentProvider{
                 db.beginTransaction();
                 //insert into FAVORITE TABLE
                 try {
-                    _id = db.insert(MovieContract.MovieEntry.TABLE_NAME_FAVORITES, null, contentValues);
-                    
-                    /* if _id == -1 means insertion failed */
-                    if (_id != -1) {
-                        //database has changed
-                        retUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, _id);
-                        System.out.println("Successful insert!");
-                    } else {
-                        System.out.println("SORRY insert FAILED!");
-                    }
-                    db.setTransactionSuccessful();
-
-                } finally {
-                    db.endTransaction();
-
-                    getContext().getContentResolver().notifyChange(uri, null);
-                }
-                break;
-
-                //return MovieContract.MovieEntry.buildFavoriteMovieUri();
-
-            case CODE_MOVIE:
-
-                db.beginTransaction();
-                //insert into FAVORITE TABLE
-                try {
                     _id = db.insert(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN, null, contentValues);
 
-
                     /* if _id == -1 means insertion failed */
                     if (_id != -1) {
                         //database has changed
@@ -325,9 +314,8 @@ public class MovieProvider extends ContentProvider{
                 }
                 break;
 
-            default:
-                throw new UnsupportedOperationException("FAILED TO perform INSERT @ Unknown uri: " + uri);
         }
-        return retUri;
+        return MovieContract.MovieEntry.buildFavoriteMovieUri();
+
     }
 }

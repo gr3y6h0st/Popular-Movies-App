@@ -32,7 +32,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     private int mCount;
 
-    MoviesAdapter(Context context, MoviesAdapterOnClickListener listener) {
+    public MoviesAdapter(Context context, MoviesAdapterOnClickListener listener) {
         mContext = context;
         //mCount = count;
         this.mOnClickListener = listener;
@@ -100,7 +100,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         //move cursor to appropriate position
         mCursor.moveToPosition(position);
 
-        Log.d(TAG, "#" + position);
+        //Log.d(TAG, "#" + position);
 
         final String IMAGE_BASE = "http://image.tmdb.org/t/p/";
 
@@ -108,7 +108,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         final String IMAGE_SIZE = "w342";
 
         String IMAGE_URL = mCursor.getString(MainActivity.INDEX_POSTER_PATH);
-        Log.d(TAG, "url" + IMAGE_URL);
+        //Log.d(TAG, "url" + IMAGE_URL);
         String url = IMAGE_BASE + IMAGE_SIZE + IMAGE_URL;
 
         //display the images into the holder
