@@ -112,7 +112,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         String url = IMAGE_BASE + IMAGE_SIZE + IMAGE_URL;
 
         //display the images into the holder
-        Picasso.get().load(url).into(holder.listImageView);
+        Picasso.get()
+                .load(url)
+                .placeholder(R.drawable.ic_launcher_background)
+                .into(holder.listImageView);
 
 
     }

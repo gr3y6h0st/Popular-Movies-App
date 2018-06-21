@@ -7,9 +7,10 @@
         android:title="@string/favorite_movie_title"
         app:showAsAction="ifRoom"/>
 
-    <item android:id="@+id/favorite_movie_action_button_off"
+    <item
+        android:id="@+id/favorite_movie_action_button_off"
         android:icon="@drawable/ic__favorite_movie_action_off"
         android:title="@string/remove_favorite_movie"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
 </menu>

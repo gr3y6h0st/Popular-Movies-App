@@ -21,6 +21,7 @@ public class MovieProvider extends ContentProvider {
 
 
     public static final int CODE_MOVIE = 100;
+    public static final int CODE_MOVIE_POPULAR = 101;
     public static final int CODE_MOVIE_DETAIL = 119;
     public static final int CODE_MOVIE_FAVORITE = 143;
     public static final int CODE_MOVIE_UNFAVORITE = 144;
@@ -35,6 +36,7 @@ public class MovieProvider extends ContentProvider {
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
         matcher.addURI(authority, MovieContract.PATH_MOVIES, CODE_MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/popular", CODE_MOVIE_POPULAR);
         matcher.addURI(authority, MovieContract.PATH_MOVIES + "/#", CODE_MOVIE_DETAIL);
 
         matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite", CODE_MOVIE_FAVORITE);
@@ -68,8 +70,20 @@ public class MovieProvider extends ContentProvider {
                         selectionArgs,
                         null,
                         null,
-                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE +" DESC",
-                        "40");
+                        sortOrder, "20");
+
+                break;
+
+            case CODE_MOVIE_POPULAR:
+                cursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder + " ASC",
+                        "20");
 
                 break;
 
@@ -99,7 +113,7 @@ public class MovieProvider extends ContentProvider {
                         new String[]{"true"},
                         null,
                         null,
-                        null);
+                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE );
 
                 break;
 

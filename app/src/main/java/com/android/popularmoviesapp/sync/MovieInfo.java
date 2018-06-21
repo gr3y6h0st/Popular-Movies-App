@@ -53,34 +53,47 @@ public class MovieInfo {
     }
 
     public static void queryTopRatedMovieInfo(Context context){
+        //currently using MOVIE LOADER CONTENTURI
 
-        MovieDbHelper movieDbHelper = new MovieDbHelper(context);
-        final SQLiteDatabase mdb = movieDbHelper.getReadableDatabase();
+        /*MovieDbHelper movieDbHelper = new MovieDbHelper(context);
+        final SQLiteDatabase mdb = movieDbHelper.getReadableDatabase();*/
+
+
         ContentResolver movieContentResolver = context.getContentResolver();
+        movieContentResolver.query(MovieContract.MovieEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE);
 
-        Cursor cursor = mdb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+        /*Cursor cursor = mdb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                 null,
                 null,
                 null,
                 null,
                 null,
-                MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC", "10");
+                MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC", "10");*/
 
 
-        cursor.setNotificationUri(movieContentResolver, MovieContract.MovieEntry.CONTENT_URI);
-        //movieContentResolver.notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);
-        cursor.close();
-
-
+        //cursor.setNotificationUri(movieContentResolver, MovieContract.MovieEntry.CONTENT_URI);
+        movieContentResolver.notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);
+        //cursor.close();
     }
 
     public static void queryPopularMovieInfo(Context context){
+        //CONTENT POPULAR URI
 
-        MovieDbHelper movieDbHelper = new MovieDbHelper(context);
-        final SQLiteDatabase mdb = movieDbHelper.getReadableDatabase();
+        /*MovieDbHelper movieDbHelper = new MovieDbHelper(context);
+        final SQLiteDatabase mdb = movieDbHelper.getReadableDatabase();*/
+
         ContentResolver movieContentResolver = context.getContentResolver();
+        movieContentResolver.query(MovieContract.MovieEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                MovieContract.MovieEntry.COLUMN_RELEASE_DATE);
 
-        Cursor cursor = mdb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+        /*Cursor cursor = mdb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                 null,
                 null,
                 null,
@@ -89,10 +102,10 @@ public class MovieInfo {
                 MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC", "2");
 
 
-        cursor.setNotificationUri(movieContentResolver, MovieContract.MovieEntry.CONTENT_URI);
-        //movieContentResolver.notifyChange(MovieContract.MovieEntry.buildMovieDetailPageUri(MovieContract.MovieEntry.COLUMN_MOVIE_ID), null);
+        cursor.setNotificationUri(movieContentResolver, MovieContract.MovieEntry.CONTENT_URI);*/
+        movieContentResolver.notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);
 
-        cursor.close();
+        //cursor.close();
 
 
     }

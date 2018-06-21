@@ -108,9 +108,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onStart() {
-        setupMB();
-
         super.onStart();
+        setupMB();
 
     }
 
@@ -125,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements
 
         //set listener for changes in Preference data
         //preferences.registerOnSharedPreferenceChangeListener(this);
+
+        Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
+        startService(syncMovieInfo);
 
     }
 
@@ -149,36 +151,32 @@ public class MainActivity extends AppCompatActivity implements
 
                 System.out.println(value);
 
-                //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
-                //startService(syncMovieInfo);
-
                 Intent queryPopularMovieInfo = new Intent(this, MovieInfoQueryIntentService.class);
                 queryPopularMovieInfo.putExtra("query_type", value);
                 //send this to Intent service to decide whether to call popular query or Top Rated query.
                 startService(queryPopularMovieInfo);
 
-                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                /*Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         null,
                         null,
                         null,
                         null,
                         null,
-                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " ASC", "10");
+                        null);
 
                 cursor.close();
 
-                this.getContentResolver().notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);
+                this.getContentResolver().notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);*/
 
                 break;
             }
 
             case "favorites": {
 
-
                 getSupportLoaderManager().destroyLoader(ID_MOVIE_LOADER);
                 getSupportLoaderManager().restartLoader(ID_FAVORITES_LOADER, null, this);
 
-
+                mDb.beginTransaction();
                 Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         new String[]{MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL},
                         MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " = ? ",
@@ -190,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements
                 //mAdapter.swapCursor(cursor);
 
                 System.out.println(value);
+                mDb.endTransaction();
                 cursor.close();
 
 
@@ -200,24 +199,20 @@ public class MainActivity extends AppCompatActivity implements
 
             case "top_rated": {
 
+                getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
+                getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
+
                 networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
                         getString(R.string.sort_highest_rated_value)));
 
                 System.out.println(value);
-
-
-                getSupportLoaderManager().destroyLoader(ID_FAVORITES_LOADER);
-                getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
-
-                //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
-                //startService(syncMovieInfo);
 
                 Intent queryTopRatedMovieInfo = new Intent(this, MovieInfoQueryIntentService.class);
 
                 queryTopRatedMovieInfo.putExtra("query_type", value);
                 startService(queryTopRatedMovieInfo);
 
-                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                /*Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         null,
                         null,
                         null,
@@ -225,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements
                         null,
                         null);
 
-                cursor.close();
+                cursor.close();*/
 
                 this.getContentResolver().notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);
 

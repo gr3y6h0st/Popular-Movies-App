@@ -382,7 +382,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
                     updateFavoriteMovie.putExtra("movieTitle", movieTitle);
                     updateFavoriteMovie.putExtra("moviePoster", moviePoster);
-                    updateFavoriteMovie.putExtra("moveBackdrop", movieBackdrop);
+                    updateFavoriteMovie.putExtra("movieBackdrop", movieBackdrop);
                     updateFavoriteMovie.putExtra("movieOverview", movieOverview);
                     updateFavoriteMovie.putExtra("movieReleaseDate", movieReleaseDate);
                     updateFavoriteMovie.putExtra("movieRating", movieRating);
