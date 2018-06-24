@@ -12,6 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.android.popularmoviesapp.data.MovieData;
+
+import java.util.ArrayList;
+
 
 public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapter.MovieDetailHolder> {
 
@@ -19,29 +23,30 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
 
     //final private MovieDetailAdapterOnClickListener mOnClickListener;
 
-    /*public interface MovieDetailAdapterOnClickListener {
-        void onItemClick (View view, String movie_id);
-    }*/
-
-    //private ArrayList<MovieData> data;
+    private ArrayList<MovieData> data;
 
     private Context mContext;
 
-    private Cursor mCursor;
+    //private Cursor mCursor;
 
     private int mCount;
 
-    public MovieTrailerAdapter(int trailer_count) {
-        //mContext = context;
-
-        mCount = trailer_count;
+    public MovieTrailerAdapter(int trailer_count, Context context, ArrayList<MovieData> movieData ) {
+        this.mContext = context;
+        this.mCount = trailer_count;
         //this.mOnClickListener = listener;
+        this.data = movieData;
 
     }
+
+    /*public interface MovieDetailAdapterOnClickListener {
+        void onItemClick (int clickedPostion);
+    }*/
 
     /*
      * Cache of children views for list item.
      */
+
     public class MovieDetailHolder extends RecyclerView.ViewHolder {
         private final Button listTrailerView;
         //Constructor for ViewHolder, references TextViews and sets onClickListener to listen for clicks
@@ -55,8 +60,8 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
                 public void onClick(View view) {
                     //keeps track of position of item being clicked
                     int clickedPosition = getAdapterPosition();
-                    mCursor.moveToPosition(clickedPosition);
-                    String trailer_key = mCursor.getString(MovieDetailActivity.INDEX_TRAILER_KEY);
+                    //mCursor.moveToPosition(clickedPosition);
+                    String trailer_key = data.get(clickedPosition).getTrailer_key();
 
                     //Log.d(TAG, trailer_key);
                     Intent openYTApp = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + trailer_key));
@@ -90,19 +95,17 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
      *               in data set.
      * @param position The position of item within the adapter's data set.
      */
-    @Override
+     @Override
     public void onBindViewHolder(@NonNull MovieDetailHolder holder, int position) {
         String no_trailers_available = mContext.getString(R.string.No_trailer_text);
-        if(mCursor == null){
+        if(data == null){
             holder.listTrailerView.setText(no_trailers_available);
         }
          else {
-            mCursor.moveToPosition(position);
             /**
              * change code to reflect MOVIE TRAILER NAME
              **/
-
-            String trailer_name = mCursor.getString(MovieDetailActivity.INDEX_TRAILER_NAME);
+            String trailer_name = data.get(position).getTrailer_name();
             if (trailer_name!= null){
                 holder.listTrailerView.setText(trailer_name);
 
@@ -131,14 +134,12 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
      */
     @Override
     public int getItemCount() {
-        if (null == mCursor) return 1;
-        return mCursor.getCount();
+        if (null == data) return 1;
+        return data.size();
     }
 
-    void swapCursor(Cursor newCursor) {
+    /*void swapCursor(Cursor newCursor) {
         mCursor = newCursor;
         notifyDataSetChanged();
-    }
-
-
+    }*/
 }

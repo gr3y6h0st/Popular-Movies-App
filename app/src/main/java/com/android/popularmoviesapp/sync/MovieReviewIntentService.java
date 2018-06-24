@@ -12,6 +12,6 @@ public class MovieReviewIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        MovieInfo.syncMovieReviewInfo(this);
+        //MovieInfo.syncMovieReviewInfo(this);
     }
 }

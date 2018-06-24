@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -22,6 +23,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,9 +39,14 @@ import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.sync.FavoritesMovieIntentService;
 import com.android.popularmoviesapp.sync.MovieInfo;
 import com.android.popularmoviesapp.sync.MovieReviewIntentService;
+import com.android.popularmoviesapp.utilities.MovieDatabaseJsonUtils;
+import com.android.popularmoviesapp.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
+import java.net.URL;
 import java.util.ArrayList;
+
+import static com.android.popularmoviesapp.utilities.NetworkUtils.getResponseFromHttpUrl;
 
 public class MovieDetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<ArrayList<MovieData>>{
@@ -80,10 +87,12 @@ public class MovieDetailActivity extends AppCompatActivity implements
     public static final int INDEX_REVIEW_URL = 12;
     public static final int INDEX_FAVORITE_BOOL = 13;
 
-    private static final int ID_MOVIE_DETAIL_LOADER = 519;
+    private static final int ID_MOVIE_TRAILER_LOADER = 519;
+    private static final int ID_MOVIE_REVIEW_LOADER = 119;
 
-    private Uri mUri;
-    private Cursor mCursor;
+
+    //private Uri mUri;
+    //private Cursor mCursor;
     private Context mContext = MovieDetailActivity.this;
 
     private ActivityMovieDetailBinding mDetailBinding;
@@ -119,11 +128,17 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
         favoriteFab = mDetailBinding.favoriteFloatingActionButton;
 
+        ActionBar actionBar = this.getSupportActionBar();
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         RecyclerView.LayoutManager layoutTrailerManager =
-                new LinearLayoutManager(this);
+                new LinearLayoutManager(getApplicationContext());
 
         RecyclerView.LayoutManager layoutReviewManager =
-                new LinearLayoutManager(this);
+
+                new LinearLayoutManager(getApplicationContext());
 
         mMovieTrailerList = mDetailBinding.mdTrailersRv;
         mMovieReviewList = mDetailBinding.mdReviewsRv;
@@ -131,25 +146,83 @@ public class MovieDetailActivity extends AppCompatActivity implements
         mMovieTrailerList.setLayoutManager(layoutTrailerManager);
         mMovieReviewList.setLayoutManager(layoutReviewManager);
 
-        mTrailerAdapter = new MovieTrailerAdapter(5);
-        mReviewAdapter = new MovieReviewAdapter(2);
-
-        mMovieTrailerList.setAdapter(mTrailerAdapter);
-        mMovieReviewList.setAdapter(mReviewAdapter);
-
-        ActionBar actionBar = this.getSupportActionBar();
-        if(actionBar != null){
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         Intent intent = getIntent();
         if (intent == null) throw new NullPointerException("YOUR INTENT cannot be null");
-        movie_details = (MovieData) intent.getSerializableExtra("movie_deets");
+        movie_details = (MovieData) intent.getSerializableExtra("movieDeets");
 
-        getSupportLoaderManager().initLoader(ID_MOVIE_DETAIL_LOADER, null, this);
+        String movieTitle = movie_details.getOriginal_title();
 
-        //Intent syncMovieReview = new Intent(this, MovieReviewIntentService.class);
-        //startService(syncMovieReview);
+        String moviePoster = movie_details.getPoster_path();
+
+        String movieBackdrop = movie_details.getBackdrop_path();
+
+        String movieOverview = movie_details.getOverview();
+
+        String movieReleaseDate = movie_details.getRelease_date();
+
+        String movieRating = movie_details.getVote_average();
+
+        //create the image url for poster and backdrop
+        final String IMAGE_BASE = "http://image.tmdb.org/t/p/";
+        final String IMAGE_SIZE_W500 = "w500";
+        final String IMAGE_SIZE_ORIGINAL = "original";
+
+        //obtain poster path from MovieData object
+        String POSTER_IMAGE_URL = moviePoster;
+        String BACKDROP_IMAGE_URL = movieBackdrop;
+
+        String poster_url = IMAGE_BASE + IMAGE_SIZE_W500 + POSTER_IMAGE_URL;
+        String backdrop_url = IMAGE_BASE + IMAGE_SIZE_ORIGINAL + BACKDROP_IMAGE_URL;
+        //output the url into Log for debug purposes
+        //Log.d(TAG, trailer_KEY);
+
+        //use Picasso to place url image into imageview
+        Picasso.get()
+                .load(poster_url)
+                .into(mDetailBinding.movieDetailIv);
+        Picasso.get()
+                .load(backdrop_url)
+                .into(mDetailBinding.movieDetailBackdropIv);
+
+        if (checkFavorite){
+            checkFavorite = !checkFavorite;
+            favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_on));
+        } else {
+            checkFavorite = !checkFavorite;
+            favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_off));
+        }
+
+        favoriteFab.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               if (checkFavorite) {
+                   checkFavorite = !checkFavorite;
+                   //TODO: find a way to write boolean value to cursor
+                   favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                           R.drawable.ic__favorite_movie_action_off));
+               } else {
+                   checkFavorite = !checkFavorite;
+                   favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                           R.drawable.ic__favorite_movie_action_on));
+
+               }
+           }
+        });
+
+        mDetailBinding.mdOriginalTitle.setText(movieTitle);
+        mDetailBinding.mdVoteAvg.setText(movieRating);
+        mDetailBinding.mdReleaseDate.setText(movieReleaseDate);
+        mDetailBinding.mdPlotSynopsis.setText(movieOverview);
+
+        //mDetailBinding.mdOriginalTitleLabel.setText(getString(R.string.md_original_title_label));
+        mDetailBinding.mdPlotSynopsisLabel.setText(getString(R.string.md_synopsis_label));
+        mDetailBinding.mdReleaseDateLabel.setText(getString(R.string.md_date_label));
+        mDetailBinding.mdVoteAvgLabel.setText(getString(R.string.md_rating_label));
+
+        String movie_ID = movie_details.getMovie_id();
+        System.out.println(movie_ID);
+
+        getSupportLoaderManager().initLoader(ID_MOVIE_TRAILER_LOADER, null, this);
 
     }
 
@@ -176,230 +249,99 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
         switch (loaderId) {
 
-            case ID_MOVIE_DETAIL_LOADER:
-                Log.v(TAG, mUri.toString());
+            case ID_MOVIE_TRAILER_LOADER:
+                System.out.println(loaderId);
 
-                return new CursorLoader(this,
-                        mUri,
-                        MOVIE_DETAIL_PROJECTION,
-                        null,
-                        null,
-                        null);
+                return new AsyncTaskLoader<ArrayList<MovieData>>(this) {
+                    @Override
+                    protected void onStartLoading() {
+                        super.onStartLoading();
+                        forceLoad();
+                    }
+
+                    @Nullable
+                    @Override
+                    public ArrayList<MovieData> loadInBackground() {
+                        String movie_ID = movie_details.getMovie_id();
+                        System.out.println("ASYNC LOAD STARTED: " + movie_ID);
+                        try{
+                            URL trailerRequestUrl = NetworkUtils.trailersBuildUrl(movie_ID);
+
+                            String jsonMovieDatabaseResponse = getResponseFromHttpUrl(trailerRequestUrl);
+
+                            ArrayList<MovieData> simpleJsonTrailerData = MovieDatabaseJsonUtils.getMovieTrailerData(jsonMovieDatabaseResponse);
+
+                            Log.v(TAG, "ASYNCTASK: " + simpleJsonTrailerData.get(0).getTrailer_type());
+
+                            return simpleJsonTrailerData;
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }
+                };
+
+            case ID_MOVIE_REVIEW_LOADER:
+
+                return new AsyncTaskLoader<ArrayList<MovieData>>(this) {
+                    @Override
+                    protected void onStartLoading() {
+                        super.onStartLoading();
+                        forceLoad();
+                    }
+
+                    @Nullable
+                    @Override
+                    public ArrayList<MovieData> loadInBackground() {
+                        String movie_ID = movie_details.getMovie_id();
+                        System.out.println("ASYNC LOAD STARTED: " + movie_ID);
+                        try {
+                            URL movieRequestUrl = NetworkUtils.reviewsBuildUrl(movie_ID);
+                            String jsonMDBResponse = getResponseFromHttpUrl(movieRequestUrl);
+
+                            ArrayList<MovieData> simpleJsonReviewData = MovieDatabaseJsonUtils.getMovieReviewData(jsonMDBResponse);
+
+                            Log.v(TAG, "ASYNCTASK: " + simpleJsonReviewData.get(0).getReview_author());
+
+                            return simpleJsonReviewData;
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }
+                };
             default:
                 throw new RuntimeException("Loader Not Implemented: "  + loaderId);
         }
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<ArrayList<MovieData>> loader, Cursor data) {
-        final Boolean isEnabled = false;
-        mCursor = data;
-        mTrailerAdapter.swapCursor(data);
-        mReviewAdapter.swapCursor(data);
+    public void onLoadFinished(@NonNull Loader<ArrayList<MovieData>> loader, ArrayList<MovieData> data) {
 
-        if(mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-        mDetailBinding.mdTrailersRv.smoothScrollToPosition(mPosition);
-        mDetailBinding.mdReviewsRv.smoothScrollToPosition(mPosition);
-
-        //data.moveToFirst();
-        //Log.v(TAG, DatabaseUtils.dumpCursorToString(data));
-
-        boolean cursorHadValidData = false;
-        if (data != null && data.moveToFirst()) {
-            cursorHadValidData = true;
+        if(loader.getId() == ID_MOVIE_TRAILER_LOADER) {
+            getSupportLoaderManager().restartLoader(ID_MOVIE_REVIEW_LOADER, null, this);
+            //System.out.println("TRAILER load finished " + data.get(0).getTrailer_key());
+            mTrailerAdapter = new MovieTrailerAdapter(5,
+                    getApplicationContext(), data);
+            mMovieTrailerList.setAdapter(mTrailerAdapter);
         }
 
-        if (!cursorHadValidData) {
-            return;
 
+        if (loader.getId() == ID_MOVIE_REVIEW_LOADER){
+            //System.out.println("REVIEW load finished " + data.get(0).getReview_author());
+
+            mReviewAdapter = new MovieReviewAdapter(getApplicationContext(), data);
+            mMovieReviewList.setAdapter(mReviewAdapter);
         }
 
-        String movieTitle = data.getString(INDEX_MOVIE_TITLE);
-
-        String moviePoster = data.getString(INDEX_MOVIE_POSTER_PATH);
-
-        String movieBackdrop = data.getString(INDEX_MOVIE_BACKDROP_PATH);
-
-        String movieOverview = data.getString(INDEX_MOVIE_OVERVIEW);
-
-        String movieReleaseDate = data.getString(INDEX_MOVIE_RELEASE_DATE);
-
-        String movieRating = data.getString(INDEX_MOVIE_VOTE_AVERAGE);
-
-        String movie_ID = data.getString(INDEX_MOVIE_ID);
-
-        String trailer_type = data.getString(INDEX_TRAILER_TYPE);
-
-        String movieTrailerName = data.getString(INDEX_TRAILER_NAME);
-
-        String movieReviewAuthor = data.getString(INDEX_REVIEW_AUTHOR);
-
-        final String trailer_KEY = data.getString(INDEX_TRAILER_KEY);
-
-        String is_favorite = data.getString(INDEX_FAVORITE_BOOL);
-
-        //this is where you get all ur information to start reading if MOVIES are FAVORITE.
-        Log.v( TAG, is_favorite);
-        if (Boolean.parseBoolean(is_favorite)){
-            checkFavorite = Boolean.parseBoolean(is_favorite);
-            favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_on));
-        } else {
-            checkFavorite = Boolean.parseBoolean(is_favorite);
-            favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_off));
-        }
-
-        MovieDbHelper movieDbHelper = new MovieDbHelper(this);
-
-        mDb = movieDbHelper.getWritableDatabase();
-
-        favoriteFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (checkFavorite) {
-                    checkFavorite = !checkFavorite;
-                    //TODO: find a way to write boolean value to cursor
-                    favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_off));
-
-                    //deleting from table!
-                    //MovieInfo.remove_Favorite_Movie(mContext);
-
-                    //update instead so that is_favorite is false.
-                    String movieTitle = mCursor.getString(INDEX_MOVIE_TITLE);
-
-                    String moviePoster = mCursor.getString(INDEX_MOVIE_POSTER_PATH);
-
-                    String movieBackdrop = mCursor.getString(INDEX_MOVIE_BACKDROP_PATH);
-
-                    String movieOverview = mCursor.getString(INDEX_MOVIE_OVERVIEW);
-
-                    String movieReleaseDate = mCursor.getString(INDEX_MOVIE_RELEASE_DATE);
-
-                    String movieRating = mCursor.getString(INDEX_MOVIE_VOTE_AVERAGE);
-
-                    String movie_ID = mCursor.getString(INDEX_MOVIE_ID);
-
-                    String trailer_type = mCursor.getString(INDEX_TRAILER_TYPE);
-
-                    String movieTrailerName = mCursor.getString(INDEX_TRAILER_NAME);
-
-                    String movieReviewAuthor = mCursor.getString(INDEX_REVIEW_AUTHOR);
-                    //Log.v( TAG, movieReviewAuthor);
-
-                    final String trailer_KEY = mCursor.getString(INDEX_TRAILER_KEY);
-
-                    String addFavorite = String.valueOf(checkFavorite);
-
-                    Intent updateFavoriteMovie = new Intent(mContext, FavoritesMovieIntentService.class);
-
-                    updateFavoriteMovie.putExtra("movieTitle", movieTitle);
-                    updateFavoriteMovie.putExtra("moviePoster", moviePoster);
-                    updateFavoriteMovie.putExtra("moveBackdrop", movieBackdrop);
-                    updateFavoriteMovie.putExtra("movieOverview", movieOverview);
-                    updateFavoriteMovie.putExtra("movieReleaseDate", movieReleaseDate);
-                    updateFavoriteMovie.putExtra("movieRating", movieRating);
-                    updateFavoriteMovie.putExtra("movie_ID", movie_ID);
-                    updateFavoriteMovie.putExtra("trailer_type", trailer_type);
-                    updateFavoriteMovie.putExtra("movieTrailerName", movieTrailerName);
-                    updateFavoriteMovie.putExtra("movieReviewAuthor", movieReviewAuthor);
-                    updateFavoriteMovie.putExtra("trailer_KEY", trailer_KEY);
-                    updateFavoriteMovie.putExtra("favorite_movie", addFavorite);
-                    Log.v(TAG, movieTitle + " " + addFavorite);
-
-                    startService(updateFavoriteMovie);
-
-
-                } else {
-                    checkFavorite = !checkFavorite;
-
-                    favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic__favorite_movie_action_on));
-
-                    String movieTitle = mCursor.getString(INDEX_MOVIE_TITLE);
-
-                    String moviePoster = mCursor.getString(INDEX_MOVIE_POSTER_PATH);
-
-                    String movieBackdrop = mCursor.getString(INDEX_MOVIE_BACKDROP_PATH);
-
-                    String movieOverview = mCursor.getString(INDEX_MOVIE_OVERVIEW);
-
-                    String movieReleaseDate = mCursor.getString(INDEX_MOVIE_RELEASE_DATE);
-
-                    String movieRating = mCursor.getString(INDEX_MOVIE_VOTE_AVERAGE);
-
-                    String movie_ID = mCursor.getString(INDEX_MOVIE_ID);
-
-                    String trailer_type = mCursor.getString(INDEX_TRAILER_TYPE);
-
-                    String movieTrailerName = mCursor.getString(INDEX_TRAILER_NAME);
-
-                    String movieReviewAuthor = mCursor.getString(INDEX_REVIEW_AUTHOR);
-                    //Log.v( TAG, movieReviewAuthor);
-
-                    final String trailer_KEY = mCursor.getString(INDEX_TRAILER_KEY);
-
-                    String addFavorite = String.valueOf(checkFavorite);
-
-                    Intent updateFavoriteMovie = new Intent(mContext, FavoritesMovieIntentService.class);
-
-                    updateFavoriteMovie.putExtra("movieTitle", movieTitle);
-                    updateFavoriteMovie.putExtra("moviePoster", moviePoster);
-                    updateFavoriteMovie.putExtra("movieBackdrop", movieBackdrop);
-                    updateFavoriteMovie.putExtra("movieOverview", movieOverview);
-                    updateFavoriteMovie.putExtra("movieReleaseDate", movieReleaseDate);
-                    updateFavoriteMovie.putExtra("movieRating", movieRating);
-                    updateFavoriteMovie.putExtra("movie_ID", movie_ID);
-                    updateFavoriteMovie.putExtra("trailer_type", trailer_type);
-                    updateFavoriteMovie.putExtra("movieTrailerName", movieTrailerName);
-                    updateFavoriteMovie.putExtra("movieReviewAuthor", movieReviewAuthor);
-                    updateFavoriteMovie.putExtra("trailer_KEY", trailer_KEY);
-                    updateFavoriteMovie.putExtra("favorite_movie", addFavorite);
-                    Log.v(TAG, movieTitle + " " + addFavorite);
-
-                    startService(updateFavoriteMovie);
-                }
-                mCursor.moveToFirst();
-                Log.v(TAG, DatabaseUtils.dumpCursorToString(mCursor));
-
-            }
-
-        });
-
-        //create the image url for poster and backdrop
-        final String IMAGE_BASE = "http://image.tmdb.org/t/p/";
-        final String IMAGE_SIZE_W500 = "w500";
-        final String IMAGE_SIZE_ORIGINAL = "original";
-
-        //obtain poster path from MovieData object
-        String POSTER_IMAGE_URL = moviePoster;
-        String BACKDROP_IMAGE_URL = movieBackdrop;
-
-        String poster_url = IMAGE_BASE + IMAGE_SIZE_W500 + POSTER_IMAGE_URL;
-        String backdrop_url = IMAGE_BASE + IMAGE_SIZE_ORIGINAL + BACKDROP_IMAGE_URL;
-        //output the url into Log for debug purposes
-        //Log.d(TAG, trailer_KEY);
-
-        //use Picasso to place url image into imageview
-        Picasso.get()
-                .load(poster_url)
-                .into(mDetailBinding.movieDetailIv);
-        Picasso.get()
-                .load(backdrop_url)
-                .into(mDetailBinding.movieDetailBackdropIv);
-
-        mDetailBinding.mdOriginalTitle.setText(movieTitle);
-        mDetailBinding.mdVoteAvg.setText(movieRating);
-        mDetailBinding.mdReleaseDate.setText(movieReleaseDate);
-        mDetailBinding.mdPlotSynopsis.setText(movieOverview);
-
-        //mDetailBinding.mdOriginalTitleLabel.setText(getString(R.string.md_original_title_label));
-        mDetailBinding.mdPlotSynopsisLabel.setText(getString(R.string.md_synopsis_label));
-        mDetailBinding.mdReleaseDateLabel.setText(getString(R.string.md_date_label));
-        mDetailBinding.mdVoteAvgLabel.setText(getString(R.string.md_rating_label));
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<ArrayList<MovieData>> loader) {
-        mTrailerAdapter.swapCursor(null);
-        mReviewAdapter.swapCursor(null);
+        //mTrailerAdapter.swapCursor(null);
+        //mReviewAdapter.swapCursor(null);
     }
 
     @Override

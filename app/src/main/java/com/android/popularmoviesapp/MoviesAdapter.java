@@ -69,15 +69,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         public void onClick(View view) {
             //keeps track of position of item being clicked
             int clickedPosition = getAdapterPosition();
-            //mCursor.moveToPosition(clickedPosition);
-            //String movie_id = mCursor.getString(MainActivity.INDEX_COLUMN_MOVIE_ID);
-            //String trailer_key = mCursor.getString(MainActivity.INDEX_COLUMN_TRAILER_KEY);
-            //Log.d(TAG, "url" + trailer_key);
-            //NetworkUtils.setMovieID(movie_id);
             mOnClickListener.onItemClick(clickedPosition);
-
             }
-
     }
 
     @NonNull

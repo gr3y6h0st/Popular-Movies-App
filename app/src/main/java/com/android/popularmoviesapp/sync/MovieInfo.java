@@ -148,7 +148,7 @@ public class MovieInfo {
 
         try{
 
-            URL movieTrailerRequestUrl = NetworkUtils.trailersBuildUrl(context);
+            URL movieTrailerRequestUrl = NetworkUtils.trailersBuildUrl("454545");
 
             String jsonMovieDatabaseResponse =
                     getResponseFromHttpUrl(movieTrailerRequestUrl);
@@ -195,7 +195,7 @@ public class MovieInfo {
         }
     }
 
-    public static void syncMovieReviewInfo(Context context) {
+    /*public static void syncMovieReviewInfo(Context context) {
 
         try{
             URL movieRequestUrl = NetworkUtils.reviewsBuildUrl(context);
@@ -210,10 +210,10 @@ public class MovieInfo {
                 ContentResolver moviesContentResolver = context.getContentResolver();
 
                 //delete any old information, then create/insert brand new data to sync.
-                /*moviesContentResolver.delete(
+                moviesContentResolver.delete(
                         MovieContract.MovieEntry.CONTENT_URI,
                         null,
-                        null);*/
+                        null);
                 String[] sel = {NetworkUtils.getMovieId()};
 
 
@@ -228,7 +228,7 @@ public class MovieInfo {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public static void update_Favorite_Movie(Context context){
     }

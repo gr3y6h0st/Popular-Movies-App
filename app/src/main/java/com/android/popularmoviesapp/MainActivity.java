@@ -378,16 +378,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onItemClick(int clickedItemIndex) {
 
-        /*Intent syncMovieTrailer = new Intent(this, MovieTrailerIntentService.class);
-        startService(syncMovieTrailer);
-
-        Intent syncMovieReview = new Intent(this, MovieReviewIntentService.class);
-        startService(syncMovieReview);
-
-        Uri movieClicked = MovieContract.MovieEntry.buildMovieDetailPageUri(movie_id);*/
-
         Intent intentToStartMovieDetailActivity = new Intent(MainActivity.this, MovieDetailActivity.class);
-        //intentToStartMovieDetailActivity.setData(movieClicked);
         intentToStartMovieDetailActivity.putExtra("movieDeets", movieDataArrayList.get(clickedItemIndex));
         startActivity(intentToStartMovieDetailActivity);
 

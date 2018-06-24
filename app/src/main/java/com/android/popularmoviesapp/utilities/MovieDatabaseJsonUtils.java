@@ -28,9 +28,9 @@ public final class MovieDatabaseJsonUtils {
     final static String MOVIE_ID = "id";
     final static String POPULARITY = "popularity";
 
+    final static String MOVIE_TRAILER_NAME = "name";
     final static String MOVIE_TRAILER_ID = "id";
     final static String MOVIE_TRAILER_KEY = "key";
-    final static String MOVIE_TRAILER_NAME = "name";
     final static String MOVIE_TRAILER_SITE = "site";
     final static String MOVIE_TRAILER_TYPE = "type";
     final static String MOVIE_TRAILER_COUNT = "count";
@@ -265,15 +265,14 @@ public final class MovieDatabaseJsonUtils {
         for(int i = 0; i < results.length(); i++){
             JSONObject currentMovie = results.getJSONObject(i);
             MovieData trailerData = new MovieData(
-                    currentMovie.getString(MOVIE_TRAILER_ID),
-                    currentMovie.getString(MOVIE_TRAILER_COUNT),
-                    currentMovie.getString(MOVIE_TRAILER_TYPE),
                     currentMovie.getString(MOVIE_TRAILER_NAME),
+                    currentMovie.getString(MOVIE_TRAILER_ID),
                     currentMovie.getString(MOVIE_TRAILER_KEY),
-                    currentMovie.getString(MOVIE_TRAILER_SITE)
+                    currentMovie.getString(MOVIE_TRAILER_SITE),
+                    currentMovie.getString(MOVIE_TRAILER_TYPE)
             );
             movieTrailerArray.add(trailerData);
-            //Log.v(TAG, movieTrailerArray.get(i).getPoster_path());
+            Log.v(TAG, movieTrailerArray.get(i).getTrailer_name());
         }
         return movieTrailerArray;
     }
@@ -286,11 +285,11 @@ public final class MovieDatabaseJsonUtils {
             JSONObject currentMovie = results.getJSONObject(i);
             MovieData reviewData = new MovieData(
                     currentMovie.getString(MOVIE_REVIEW_AUTHOR),
-                    currentMovie.getString(MOVIE_REVIEW_URL),
-                    currentMovie.getString(MOVIE_REVIEW_CONTENT)
+                    currentMovie.getString(MOVIE_REVIEW_CONTENT),
+                    currentMovie.getString(MOVIE_REVIEW_URL)
             );
             movieReviewArray.add(reviewData);
-            //Log.v(TAG, movieReviewArray.get(i).getPoster_path());
+            Log.v(TAG, movieReviewArray.get(i).getReview_author());
         }
         return movieReviewArray;
     }

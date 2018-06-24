@@ -29,7 +29,7 @@
     <string name="md_review_read_more_url_text">Read More</string>
     <string name="favorite_movie_title">Favorite Movie</string>
 
-    <string name="Cursor_is_null_adapter">CURSOR IS NULL</string>
+    <string name="Data_is_null_adapter">MovieData object IS NULL</string>
     <string name="remove_favorite_movie">Remove Favorite Movie</string>
 
 </resources>

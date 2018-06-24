@@ -60,8 +60,8 @@ public class NetworkUtils {
         return url;
     }
 
-    public static URL trailersBuildUrl (Context context){
-        Uri builtUri = Uri.parse(MOVIEDB_BASE_URL + MOVIE_ID).buildUpon()
+    public static URL trailersBuildUrl (String movie_ID){
+        Uri builtUri = Uri.parse(MOVIEDB_BASE_URL + movie_ID).buildUpon()
                 .appendPath(VIDEO_PATH)
                 .appendQueryParameter(APPID_PARAM, API_KEY)
                 .build();
@@ -76,8 +76,8 @@ public class NetworkUtils {
         return url;
     }
 
-    public static URL reviewsBuildUrl (Context context){
-        Uri builtUri = Uri.parse(MOVIEDB_BASE_URL + MOVIE_ID).buildUpon()
+    public static URL reviewsBuildUrl (String movie_ID){
+        Uri builtUri = Uri.parse(MOVIEDB_BASE_URL + movie_ID).buildUpon()
                 .appendPath(REVIEW_PATH)
                 .appendQueryParameter(APPID_PARAM, API_KEY)
                 .build();
