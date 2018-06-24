@@ -26,6 +26,7 @@ public final class MovieDatabaseJsonUtils {
     final static String BACKDROP_PATH = "backdrop_path";
     final static String VOTE_AVERAGE = "vote_average";
     final static String MOVIE_ID = "id";
+    final static String POPULARITY = "popularity";
 
     final static String MOVIE_TRAILER_ID = "id";
     final static String MOVIE_TRAILER_KEY = "key";
@@ -105,30 +106,6 @@ public final class MovieDatabaseJsonUtils {
 
         return reviewContentValues;
     }
-
-    /*public static ArrayList<MovieData> getMovieTrailerData(String json) throws JSONException {
-
-
-        JSONObject movieTrailerData = new JSONObject(json);
-        JSONArray results = movieTrailerData.getJSONArray(RESULTS);
-
-        ArrayList<MovieData> movieTrailerArray = new ArrayList<MovieData>();
-
-        for(int i = 0; i < results.length(); i++){
-            JSONObject currentMovie = results.getJSONObject(i);
-            MovieData trailerData = new MovieData(
-                    currentMovie.getString(ORIGINAL_TITLE),
-                    currentMovie.getString(POSTER_PATH),
-                    currentMovie.getString(VOTE_AVERAGE),
-                    currentMovie.getString(RELEASE_DATE),
-                    currentMovie.getString(OVERVIEW)
-            );
-            movieTrailerArray.add(trailerData);
-            //Log.v(TAG, moviesArray.get(i).getPoster_path());
-        }
-
-        return movieTrailerArray;
-    }*/
 
     public static ContentValues getContentValueTrailerData (Context context, String trailerJsonStr)
             throws JSONException {
@@ -228,6 +205,7 @@ public final class MovieDatabaseJsonUtils {
             String voteAverage;
             String releaseDate;
             String id;
+            String popularity;
 
             // get current JSON object
             JSONObject currentMovie = results.getJSONObject(i);
@@ -240,6 +218,7 @@ public final class MovieDatabaseJsonUtils {
             voteAverage = currentMovie.getString(VOTE_AVERAGE);
             releaseDate = currentMovie.getString(RELEASE_DATE);
             id = currentMovie.getString(MOVIE_ID);
+            popularity = currentMovie.getString(POPULARITY);
 
             ContentValues movieSpecifics = new ContentValues();
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_TITLE, original_title);
@@ -249,10 +228,70 @@ public final class MovieDatabaseJsonUtils {
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
+            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_POPULARITY, popularity);
 
             movieContentValues[i] = movieSpecifics;
         }
 
         return movieContentValues;
+    }
+
+    public static ArrayList<MovieData> getMovieData(String json) throws JSONException {
+        JSONObject movieData = new JSONObject(json);
+        JSONArray results = movieData.getJSONArray(RESULTS);
+        ArrayList<MovieData> moviesArray = new ArrayList<MovieData>();
+        for(int i = 0; i < results.length(); i++){
+            JSONObject currentMovie = results.getJSONObject(i);
+            MovieData movieSpecifics = new MovieData(
+                    currentMovie.getString(MOVIE_ID),
+                    currentMovie.getString(ORIGINAL_TITLE),
+                    currentMovie.getString(POSTER_PATH),
+                    currentMovie.getString(BACKDROP_PATH),
+                    currentMovie.getString(VOTE_AVERAGE),
+                    currentMovie.getString(RELEASE_DATE),
+                    currentMovie.getString(OVERVIEW)
+
+            );
+            moviesArray.add(movieSpecifics);
+            //Log.v(TAG, movieArray.get(i).getPoster_path());
+        }
+        return moviesArray;
+    }
+
+    public static ArrayList<MovieData> getMovieTrailerData(String json) throws JSONException {
+        JSONObject movieTrailerData = new JSONObject(json);
+        JSONArray results = movieTrailerData.getJSONArray(RESULTS);
+        ArrayList<MovieData> movieTrailerArray = new ArrayList<MovieData>();
+        for(int i = 0; i < results.length(); i++){
+            JSONObject currentMovie = results.getJSONObject(i);
+            MovieData trailerData = new MovieData(
+                    currentMovie.getString(MOVIE_TRAILER_ID),
+                    currentMovie.getString(MOVIE_TRAILER_COUNT),
+                    currentMovie.getString(MOVIE_TRAILER_TYPE),
+                    currentMovie.getString(MOVIE_TRAILER_NAME),
+                    currentMovie.getString(MOVIE_TRAILER_KEY),
+                    currentMovie.getString(MOVIE_TRAILER_SITE)
+            );
+            movieTrailerArray.add(trailerData);
+            //Log.v(TAG, movieTrailerArray.get(i).getPoster_path());
+        }
+        return movieTrailerArray;
+    }
+
+    public static ArrayList<MovieData> getMovieReviewData(String json) throws JSONException {
+        JSONObject movieReviewData = new JSONObject(json);
+        JSONArray results = movieReviewData.getJSONArray(RESULTS);
+        ArrayList<MovieData> movieReviewArray = new ArrayList<MovieData>();
+        for(int i = 0; i < results.length(); i++){
+            JSONObject currentMovie = results.getJSONObject(i);
+            MovieData reviewData = new MovieData(
+                    currentMovie.getString(MOVIE_REVIEW_AUTHOR),
+                    currentMovie.getString(MOVIE_REVIEW_URL),
+                    currentMovie.getString(MOVIE_REVIEW_CONTENT)
+            );
+            movieReviewArray.add(reviewData);
+            //Log.v(TAG, movieReviewArray.get(i).getPoster_path());
+        }
+        return movieReviewArray;
     }
 }

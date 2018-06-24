@@ -43,9 +43,9 @@ public class NetworkUtils {
     private static String SORT_ORDER = "popular";
 
 
-    public static URL buildUrl(Context context) {
+    public static URL buildUrl(String sortOrder) {
         Uri builtUri = Uri.parse(MOVIEDB_BASE_URL).buildUpon()
-                .appendPath(SORT_ORDER)
+                .appendPath(sortOrder)
                 .appendQueryParameter(APPID_PARAM, API_KEY)
                 .build();
 

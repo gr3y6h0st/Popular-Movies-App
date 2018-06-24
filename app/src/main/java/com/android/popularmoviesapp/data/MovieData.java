@@ -8,16 +8,24 @@ public class MovieData implements Serializable{
 
     private String original_title;
     private String poster_path;
+    private String backdrop_path;
     private String overview;
     private String vote_average;
     private String release_date;
+    private String movie_id;
 
     private String trailer_name;
     private String trailer_key;
     private String trailer_site;
     private String trailer_id;
     private String trailer_type;
-    private static boolean favorite_movie = false;
+    private String trailer_count;
+
+    private String review_url;
+    private String review_author;
+    private String review_content;
+
+    private boolean favorite_movie = false;
 
     /**
      * No args constructor, use in serialization
@@ -25,22 +33,38 @@ public class MovieData implements Serializable{
     public MovieData() {
     }
 
-    public MovieData(String name, String key, String site, String id, String type) {
-        this.trailer_name = name;
-        this.trailer_key = key;
-        this.trailer_site = site;
-        this.trailer_id = id;
-        this.trailer_type= type;
+    public MovieData(String movieID, String originalTitle, String posterPath, String backdropPath,
+                     String voteAverage, String releaseDate, String overview) {
+
+        this.movie_id = movieID;
+        this.original_title = originalTitle;
+        this.poster_path = posterPath;
+        this.backdrop_path = backdropPath;
+        this.vote_average = voteAverage;
+        this.release_date = releaseDate;
+        this.overview = overview;
     }
 
-    //trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_NAME, name);
-    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_KEY, key);
-    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_SITE, site);
-    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_ID, id);
-    //                trailerSpecifics.put(MovieContract.MovieEntry.COLUMN_TRAILER_TYPE, type);
+    public MovieData(String trailerName, String trailerId, String trailerKey, String trailerSite,
+                     String trailerType, String trailerCount) {
+
+        this.trailer_id = trailerId;
+        this.trailer_name = trailerName;
+        this.poster_path = trailerKey;
+        this.backdrop_path = trailerSite;
+        this.vote_average = trailerType;
+        this.trailer_count = trailerCount;
+    }
+
+    public MovieData(String reviewAuthor, String reviewContent, String reviewUrl) {
+
+        this.review_author = reviewAuthor;
+        this.review_content = reviewContent;
+        this.review_url = reviewUrl;
+    }
 
     public MovieData (boolean check_favorite_movie){
-        this.favorite_movie = favorite_movie;
+        this.favorite_movie = check_favorite_movie;
     }
 
     public String getOriginal_title() {

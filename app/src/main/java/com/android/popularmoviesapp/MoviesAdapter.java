@@ -10,8 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.android.popularmoviesapp.data.MovieData;
 import com.android.popularmoviesapp.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
@@ -20,11 +23,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     final private MoviesAdapterOnClickListener mOnClickListener;
 
-    public interface MoviesAdapterOnClickListener {
-        void onItemClick (View view, String movie_id);
-    }
-
-    //private ArrayList<MovieData> data;
+    private ArrayList<MovieData> data;
 
     private Context mContext;
 
@@ -32,18 +31,30 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     private int mCount;
 
-    public MoviesAdapter(Context context, MoviesAdapterOnClickListener listener) {
+    /*public MoviesAdapter(Context context, MoviesAdapterOnClickListener listener) {
         mContext = context;
         //mCount = count;
         this.mOnClickListener = listener;
 
+    }*/
+    public MoviesAdapter(Context context, ArrayList<MovieData> movieData, MoviesAdapterOnClickListener listener) {
+        this.mContext = context;
+        this.data = movieData;
+        //mCount = count;
+        this.mOnClickListener = listener;
+
+    }
+
+    public interface MoviesAdapterOnClickListener {
+
+        void onItemClick(int clickedPosition);
     }
 
     /*
      * Cache of children views for list item.
      */
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private final ImageView listImageView;
+        private ImageView listImageView;
         //Constructor for ViewHolder, references TextViews and sets onClickListener to listen for clicks
         //via onClick method.
         MovieViewHolder(View view){
@@ -57,14 +68,13 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         @Override
         public void onClick(View view) {
             //keeps track of position of item being clicked
-            int clickedPosition = this.getAdapterPosition();
-            mCursor.moveToPosition(clickedPosition);
-            String movie_id = mCursor.getString(MainActivity.INDEX_COLUMN_MOVIE_ID);
+            int clickedPosition = getAdapterPosition();
+            //mCursor.moveToPosition(clickedPosition);
+            //String movie_id = mCursor.getString(MainActivity.INDEX_COLUMN_MOVIE_ID);
             //String trailer_key = mCursor.getString(MainActivity.INDEX_COLUMN_TRAILER_KEY);
             //Log.d(TAG, "url" + trailer_key);
-            NetworkUtils.setMovieID(movie_id);
-
-            mOnClickListener.onItemClick(view, movie_id);
+            //NetworkUtils.setMovieID(movie_id);
+            mOnClickListener.onItemClick(clickedPosition);
 
             }
 
@@ -75,10 +85,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
 
         int layoutIdForListItem = R.layout.movies_list_item;
+
         boolean shouldAttachToParentImmediately = false;
 
         View view = LayoutInflater
-                .from(mContext)
+                .from(viewGroup.getContext())
                 .inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
 
         return new MovieViewHolder(view);
@@ -94,20 +105,20 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
      */
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-        if(mCursor == null){
+        if(data == null){
             return;
         }
         //move cursor to appropriate position
-        mCursor.moveToPosition(position);
+        //mCursor.moveToPosition(position);
 
-        //Log.d(TAG, "#" + position);
+        Log.d(TAG, "#" + position);
 
         final String IMAGE_BASE = "http://image.tmdb.org/t/p/";
 
         //image size on recyclerView, not in the MovieDetail page!
         final String IMAGE_SIZE = "w342";
 
-        String IMAGE_URL = mCursor.getString(MainActivity.INDEX_POSTER_PATH);
+        String IMAGE_URL = data.get(position).getPoster_path();
         //Log.d(TAG, "url" + IMAGE_URL);
         String url = IMAGE_BASE + IMAGE_SIZE + IMAGE_URL;
 
@@ -126,14 +137,14 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
      */
     @Override
     public int getItemCount() {
-        if (null == mCursor) return 0;
-        return mCursor.getCount();
+        if (null == data) return 0;
+        return data.size();
     }
 
-    void swapCursor(Cursor newCursor) {
+    /*public void swapCursor(Cursor newCursor) {
         mCursor = newCursor;
         notifyDataSetChanged();
-    }
+    }*/
 
 
 }

@@ -37,6 +37,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                         MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_REVIEW_URL + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " TEXT DEFAULT 'false', " +
+                        MovieContract.MovieEntry.COLUMN_POPULARITY + " TEXT, " +
                         " UNIQUE (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
 
 

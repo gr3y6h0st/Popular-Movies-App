@@ -74,7 +74,7 @@ public class MovieProvider extends ContentProvider {
 
                 break;
 
-            case CODE_MOVIE_POPULAR:
+           /* case CODE_MOVIE_POPULAR:
                 cursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         projection,
@@ -85,7 +85,7 @@ public class MovieProvider extends ContentProvider {
                         sortOrder + " ASC",
                         "20");
 
-                break;
+                break;*/
 
             case CODE_MOVIE_DETAIL:
 

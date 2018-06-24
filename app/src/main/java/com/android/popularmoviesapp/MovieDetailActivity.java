@@ -39,8 +39,10 @@ import com.android.popularmoviesapp.sync.MovieInfo;
 import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+
 public class MovieDetailActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>{
+        LoaderManager.LoaderCallbacks<ArrayList<MovieData>>{
 
     final String TAG = MovieDetailActivity.class.getSimpleName();
 
@@ -99,6 +101,8 @@ public class MovieDetailActivity extends AppCompatActivity implements
     FloatingActionButton favoriteFab;
     SQLiteDatabase mDb;
 
+    MovieData movie_details;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -138,13 +142,14 @@ public class MovieDetailActivity extends AppCompatActivity implements
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mUri = getIntent().getData();
-        if (mUri == null) throw new NullPointerException("URI cannot be null");
+        Intent intent = getIntent();
+        if (intent == null) throw new NullPointerException("YOUR INTENT cannot be null");
+        movie_details = (MovieData) intent.getSerializableExtra("movie_deets");
 
         getSupportLoaderManager().initLoader(ID_MOVIE_DETAIL_LOADER, null, this);
 
-        Intent syncMovieReview = new Intent(this, MovieReviewIntentService.class);
-        startService(syncMovieReview);
+        //Intent syncMovieReview = new Intent(this, MovieReviewIntentService.class);
+        //startService(syncMovieReview);
 
     }
 
@@ -156,51 +161,6 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
 
         switch (itemClicked) {
-            /*case R.id.favorite_movie_action_button_on:
-
-                String movieTitle = mCursor.getString(INDEX_MOVIE_TITLE);
-
-                String moviePoster = mCursor.getString(INDEX_MOVIE_POSTER_PATH);
-
-                String movieBackdrop = mCursor.getString(INDEX_MOVIE_BACKDROP_PATH);
-
-                String movieOverview = mCursor.getString(INDEX_MOVIE_OVERVIEW);
-
-                String movieReleaseDate = mCursor.getString(INDEX_MOVIE_RELEASE_DATE);
-
-                String movieRating = mCursor.getString(INDEX_MOVIE_VOTE_AVERAGE);
-
-                String movie_ID = mCursor.getString(INDEX_MOVIE_ID);
-
-                String trailer_type = mCursor.getString(INDEX_TRAILER_TYPE);
-
-
-                String movieTrailerName = mCursor.getString(INDEX_TRAILER_NAME);
-
-                String movieReviewAuthor = mCursor.getString(INDEX_REVIEW_AUTHOR);
-                //Log.v( TAG, movieReviewAuthor);
-
-                final String trailer_KEY = mCursor.getString(INDEX_TRAILER_KEY);
-
-                Intent updateFavoriteMovie = new Intent(this, FavoritesMovieIntentService.class);
-                updateFavoriteMovie.putExtra("movieTitle", movieTitle);
-                updateFavoriteMovie.putExtra("moviePoster", moviePoster);
-                updateFavoriteMovie.putExtra("moveBackdrop", movieBackdrop);
-                updateFavoriteMovie.putExtra("movieOverview", movieOverview);
-                updateFavoriteMovie.putExtra("movieReleaseDate", movieReleaseDate);
-                updateFavoriteMovie.putExtra("movieRating", movieRating);
-                updateFavoriteMovie.putExtra("movie_ID", movie_ID);
-                updateFavoriteMovie.putExtra("trailer_type", trailer_type);
-                updateFavoriteMovie.putExtra("movieTrailerName", movieTrailerName);
-                updateFavoriteMovie.putExtra("movieReviewAuthor", movieReviewAuthor);
-                updateFavoriteMovie.putExtra("trailer_KEY", trailer_KEY);
-
-                startService(updateFavoriteMovie);
-
-                return true;
-
-            case R.id.favorite_movie_action_button_off:
-                MovieInfo.remove_Favorite_Movie(context);*/
 
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
@@ -212,7 +172,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
     @NonNull
     @Override
-    public Loader<Cursor> onCreateLoader(int loaderId, @Nullable Bundle args) {
+    public Loader<ArrayList<MovieData>> onCreateLoader(int loaderId, @Nullable Bundle args) {
 
         switch (loaderId) {
 
@@ -231,7 +191,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(@NonNull Loader<ArrayList<MovieData>> loader, Cursor data) {
         final Boolean isEnabled = false;
         mCursor = data;
         mTrailerAdapter.swapCursor(data);
@@ -437,7 +397,7 @@ public class MovieDetailActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull Loader<ArrayList<MovieData>> loader) {
         mTrailerAdapter.swapCursor(null);
         mReviewAdapter.swapCursor(null);
     }

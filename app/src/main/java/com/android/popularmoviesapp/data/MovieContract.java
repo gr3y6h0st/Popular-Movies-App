@@ -58,6 +58,8 @@ public class MovieContract {
 
         public static final String COLUMN_FAVORITE_BOOL = "favorite";
 
+        public static final String COLUMN_POPULARITY = "popularity";
+
 
     }
 }
