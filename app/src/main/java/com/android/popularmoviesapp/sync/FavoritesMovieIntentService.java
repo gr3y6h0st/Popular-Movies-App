@@ -35,15 +35,19 @@ public class FavoritesMovieIntentService extends IntentService {
 
             String movie_ID = intent.getStringExtra("movie_ID");
 
-            String trailer_type = intent.getStringExtra("trailer_type");
+            String favorite_movie = intent.getStringExtra("favorite_movie");
+
+
+           /* String trailer_type = intent.getStringExtra("trailer_type");
 
             String movieTrailerName = intent.getStringExtra("movieTrailerName");
 
             String movieReviewAuthor = intent.getStringExtra("movieReviewAuthor");
 
-            String favorite_movie = intent.getStringExtra("favorite_movie");
+            String trailer_KEY = intent.getStringExtra("trailer_KEY");*/
 
-            String trailer_KEY = intent.getStringExtra("trailer_KEY");
+           System.out.println(movie_ID);
+
 
             ContentValues favoriteData = new ContentValues();
             favoriteData.put(MovieContract.MovieEntry.COLUMN_TITLE, movieTitle);
@@ -53,10 +57,6 @@ public class FavoritesMovieIntentService extends IntentService {
             favoriteData.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movieRating);
             favoriteData.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
             favoriteData.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movie_ID);
-            favoriteData.put(MovieContract.MovieEntry.COLUMN_TRAILER_TYPE, trailer_type);
-            favoriteData.put(MovieContract.MovieEntry.COLUMN_TRAILER_NAME, movieTrailerName);
-            favoriteData.put(MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR, movieReviewAuthor);
-            favoriteData.put(MovieContract.MovieEntry.COLUMN_TRAILER_KEY, trailer_KEY);
             favoriteData.put(MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL, favorite_movie);
 
             ContentResolver favoritesContentResolver = this.getContentResolver();
@@ -64,7 +64,7 @@ public class FavoritesMovieIntentService extends IntentService {
             String[] sel = {movie_ID};
 
             favoritesContentResolver.update(
-                    MovieContract.MovieEntry.buildFavoriteMovieUri(),
+                    MovieContract.MovieEntry.buildFavoriteMovieUri(movie_ID),
                     favoriteData,
                     "id = ?",
                     sel);

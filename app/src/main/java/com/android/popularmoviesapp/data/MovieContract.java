@@ -23,15 +23,9 @@ public class MovieContract {
                 .appendPath(PATH_MOVIES)
                 .build();
 
-        public static Uri buildMovieDetailPageUri(String movie_id) {
+        public static Uri buildFavoriteMovieUri(String movie_id){
             return CONTENT_URI.buildUpon()
                     .appendPath(movie_id)
-                    .build();
-        }
-
-        public static Uri buildFavoriteMovieUri(){
-            return CONTENT_URI.buildUpon()
-                    .appendPath("favorite")
                     .build();
         }
 
@@ -45,21 +39,6 @@ public class MovieContract {
         public static final String COLUMN_RELEASE_DATE = "release_date";
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_MOVIE_ID = "id";
-
-        public static final String COLUMN_TRAILER_KEY = "key";
-        public static final String COLUMN_TRAILER_NAME = "name";
-        public static final String COLUMN_TRAILER_TYPE = "type";
-        public static final String COLUMN_TRAILER_SITE = "site";
-        public static final String COLUMN_TRAILER_ID = "trailerID";
-
-        public static final String COLUMN_REVIEW_AUTHOR = "author";
-        public static final String COLUMN_REVIEW_CONTENT = "content";
-        public static final String COLUMN_REVIEW_URL = "url";
-
         public static final String COLUMN_FAVORITE_BOOL = "favorite";
-
-        public static final String COLUMN_POPULARITY = "popularity";
-
-
     }
 }

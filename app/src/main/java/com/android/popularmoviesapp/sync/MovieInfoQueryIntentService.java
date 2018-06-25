@@ -12,7 +12,7 @@ public class MovieInfoQueryIntentService extends IntentService{
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        assert intent != null;
+        /*assert intent != null;
         if(intent.getStringExtra("query_type").equals("popular")){
             MovieInfo.queryPopularMovieInfo(this);
             System.out.println("starting pop-query");
@@ -20,6 +20,6 @@ public class MovieInfoQueryIntentService extends IntentService{
             MovieInfo.queryTopRatedMovieInfo(this);
             System.out.println("starting top_rated-query");
 
-        }
+        }*/
     }
 }

@@ -13,6 +13,6 @@ public class MovieTrailerIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        MovieInfo.syncMovieTrailerInfo(this);
+        //MovieInfo.syncMovieTrailerInfo(this);
     }
 }

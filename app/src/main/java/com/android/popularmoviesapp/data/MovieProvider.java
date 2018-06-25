@@ -36,11 +36,8 @@ public class MovieProvider extends ContentProvider {
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
         matcher.addURI(authority, MovieContract.PATH_MOVIES, CODE_MOVIE);
-        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/popular", CODE_MOVIE_POPULAR);
-        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/#", CODE_MOVIE_DETAIL);
-
-        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite", CODE_MOVIE_FAVORITE);
-        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite/#", CODE_MOVIE_UNFAVORITE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIES + "/*", CODE_MOVIE_FAVORITE);
+        //matcher.addURI(authority, MovieContract.PATH_MOVIES + "/favorite/#", CODE_MOVIE_UNFAVORITE);
 
         return matcher;
 
@@ -58,12 +55,14 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection,
                         @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+
         Cursor cursor;
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         switch (sUriMatcher.match(uri)) {
 
             case CODE_MOVIE:
-                cursor = mOpenHelper.getReadableDatabase().query(
+                cursor = db.query(
                         MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         projection,
                         selection,
@@ -85,7 +84,7 @@ public class MovieProvider extends ContentProvider {
                         sortOrder + " ASC",
                         "20");
 
-                break;*/
+                break;
 
             case CODE_MOVIE_DETAIL:
 
@@ -101,16 +100,24 @@ public class MovieProvider extends ContentProvider {
                         null,
                         null);
 
-                break;
+                break;*/
 
 
             case CODE_MOVIE_FAVORITE:
 
-                cursor = mOpenHelper.getReadableDatabase().query(
+                /*cursor = db.query(
                         MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         projection,
                         MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " = ? ",
                         new String[]{"true"},
+                        null,
+                        null,
+                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE );*/
+                cursor = db.query(
+                        null,
+                        null,
+                        null,
+                       null,
                         null,
                         null,
                         MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE );
@@ -183,7 +190,7 @@ public class MovieProvider extends ContentProvider {
                 return favoritesInserted;*/
 
 
-            case CODE_MOVIE_DETAIL:
+            /*case CODE_MOVIE_DETAIL:
                 db.beginTransaction();
                 int trailerInfoRowsInserted = 0;
                 try {
@@ -201,7 +208,8 @@ public class MovieProvider extends ContentProvider {
                 if (trailerInfoRowsInserted > 0) {
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
-                return trailerInfoRowsInserted;
+                return trailerInfoRowsInserted;*/
+
             default:
                 return super.bulkInsert(uri, contentValues);
         }
@@ -264,7 +272,7 @@ public class MovieProvider extends ContentProvider {
                 break;
 
 
-            case CODE_MOVIE_DETAIL:
+            /*case CODE_MOVIE_DETAIL:
                 //String[] selectionArguments = {uri.getLastPathSegment()};
 
                 rowsUpdated = mOpenHelper.getWritableDatabase().update(
@@ -273,7 +281,7 @@ public class MovieProvider extends ContentProvider {
                         MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ",
                         selectionArgs
                 );
-                break;
+                break;*/
 
             case CODE_MOVIE_FAVORITE:
 
@@ -299,7 +307,7 @@ public class MovieProvider extends ContentProvider {
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Uri retUri = null;
-        long _id;
+        long id;
 
 
         switch (sUriMatcher.match(uri)) {
@@ -309,12 +317,12 @@ public class MovieProvider extends ContentProvider {
                 db.beginTransaction();
                 //insert into FAVORITE TABLE
                 try {
-                    _id = db.insert(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN, null, contentValues);
+                    id = db.insert(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN, null, contentValues);
 
                     /* if _id == -1 means insertion failed */
-                    if (_id != -1) {
+                    if (id != -1) {
                         //database has changed
-                        retUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, _id);
+                        retUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, id);
                         System.out.println("Successful insert!");
                     } else {
                         System.out.println("SORRY insert FAILED!");
@@ -329,7 +337,7 @@ public class MovieProvider extends ContentProvider {
                 break;
 
         }
-        return MovieContract.MovieEntry.buildFavoriteMovieUri();
+        return retUri;
 
     }
 }

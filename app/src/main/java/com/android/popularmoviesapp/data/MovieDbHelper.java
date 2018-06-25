@@ -21,23 +21,14 @@ public class MovieDbHelper extends SQLiteOpenHelper{
         //create table
         final String SQL_CREATE_MOVIE_MAIN_TABLE =
                 "CREATE TABLE " + MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN + " (" +
+                        MovieContract.MovieEntry.COLUMN_MOVIE_ID + " TEXT NOT NULL PRIMARY KEY, " +
                         MovieContract.MovieEntry.COLUMN_TITLE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_POSTER_PATH + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_BACKDROP_PATH + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_RELEASE_DATE + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_OVERVIEW + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_MOVIE_ID + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_TRAILER_KEY + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_TRAILER_NAME + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_TRAILER_TYPE + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_TRAILER_SITE + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_TRAILER_ID + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT + " TEXT, " +
-                        MovieContract.MovieEntry.COLUMN_REVIEW_URL + " TEXT, " +
                         MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " TEXT DEFAULT 'false', " +
-                        MovieContract.MovieEntry.COLUMN_POPULARITY + " TEXT, " +
                         " UNIQUE (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
 
 

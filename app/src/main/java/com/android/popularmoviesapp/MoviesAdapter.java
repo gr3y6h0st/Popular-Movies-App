@@ -15,6 +15,7 @@ import com.android.popularmoviesapp.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
@@ -132,6 +133,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     public int getItemCount() {
         if (null == data) return 0;
         return data.size();
+    }
+
+    public void notifyMovieDataChange(ArrayList<MovieData> movieData){
+        data = new ArrayList<MovieData>();
+        data.addAll(movieData);
+        notifyDataSetChanged();
     }
 
     /*public void swapCursor(Cursor newCursor) {

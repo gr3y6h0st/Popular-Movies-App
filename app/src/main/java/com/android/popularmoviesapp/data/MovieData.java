@@ -25,7 +25,7 @@ public class MovieData implements Serializable{
     private String review_author;
     private String review_content;
 
-    private boolean favorite_movie = false;
+    private String check_favorite_movie;
 
     /**
      * No args constructor, use in serialization
@@ -45,6 +45,19 @@ public class MovieData implements Serializable{
         this.overview = overview;
     }
 
+    public MovieData(String movieID, String originalTitle, String posterPath, String backdropPath,
+                     String voteAverage, String releaseDate, String overview, String checkfavorite) {
+
+        this.movie_id = movieID;
+        this.original_title = originalTitle;
+        this.poster_path = posterPath;
+        this.backdrop_path = backdropPath;
+        this.vote_average = voteAverage;
+        this.release_date = releaseDate;
+        this.overview = overview;
+        this.check_favorite_movie = checkfavorite;
+    }
+
     public MovieData(String name, String id, String key, String site,
                      String type) {
 
@@ -60,10 +73,6 @@ public class MovieData implements Serializable{
         this.review_author = author;
         this.review_content = content;
         this.review_url = url;
-    }
-
-    public MovieData (boolean check_favorite_movie){
-        this.favorite_movie = check_favorite_movie;
     }
 
     public String getOriginal_title() {
@@ -112,14 +121,6 @@ public class MovieData implements Serializable{
 
     public void setRelease_date(String release_date) {
         this.release_date = release_date;
-    }
-
-    public boolean checkFavorite_movie() {
-        return favorite_movie;
-    }
-
-    public void setFavorite_movie(boolean new_fav_movie){
-        favorite_movie = new_fav_movie;
     }
 
     public String getMovie_id() {

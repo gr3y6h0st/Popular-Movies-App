@@ -29,7 +29,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.databinding.DataBindingUtil;
 import android.view.View;
-import android.widget.ImageButton;
 
 import com.android.popularmoviesapp.data.MovieData;
 import com.android.popularmoviesapp.data.MovieDbHelper;
@@ -38,7 +37,6 @@ import com.android.popularmoviesapp.databinding.ActivityMovieDetailBinding;
 import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.sync.FavoritesMovieIntentService;
 import com.android.popularmoviesapp.sync.MovieInfo;
-import com.android.popularmoviesapp.sync.MovieReviewIntentService;
 import com.android.popularmoviesapp.utilities.MovieDatabaseJsonUtils;
 import com.android.popularmoviesapp.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -61,12 +59,6 @@ public class MovieDetailActivity extends AppCompatActivity implements
             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
-            MovieContract.MovieEntry.COLUMN_TRAILER_KEY,
-            MovieContract.MovieEntry.COLUMN_TRAILER_TYPE,
-            MovieContract.MovieEntry.COLUMN_TRAILER_NAME,
-            MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR,
-            MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT,
-            MovieContract.MovieEntry.COLUMN_REVIEW_URL,
             MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL
     };
 
@@ -128,6 +120,9 @@ public class MovieDetailActivity extends AppCompatActivity implements
 
         favoriteFab = mDetailBinding.favoriteFloatingActionButton;
 
+        MovieDbHelper movieDbHelper = new MovieDbHelper(this);
+        mDb = movieDbHelper.getWritableDatabase();
+
         ActionBar actionBar = this.getSupportActionBar();
         if(actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -149,6 +144,8 @@ public class MovieDetailActivity extends AppCompatActivity implements
         Intent intent = getIntent();
         if (intent == null) throw new NullPointerException("YOUR INTENT cannot be null");
         movie_details = (MovieData) intent.getSerializableExtra("movieDeets");
+        int movieIndex = (int) intent.getSerializableExtra("moviePosition");
+        System.out.println("THIS IS THE POSITION: " + movieIndex);
 
         String movieTitle = movie_details.getOriginal_title();
 
@@ -200,10 +197,33 @@ public class MovieDetailActivity extends AppCompatActivity implements
                    //TODO: find a way to write boolean value to cursor
                    favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
                            R.drawable.ic__favorite_movie_action_off));
+                   //delete happens here
+                   System.out.println("delete happening here.");
                } else {
                    checkFavorite = !checkFavorite;
                    favoriteFab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
                            R.drawable.ic__favorite_movie_action_on));
+
+                   addFavoriteMove();
+                   //add happens here
+                   //MovieDatabaseJsonUtils.getFavoriteContentValueData(getApplicationContext(), movie_details, checkFavorite);
+                   /*Intent updateFavoriteMovie = new Intent(mContext, FavoritesMovieIntentService.class);
+
+                   updateFavoriteMovie.putExtra("movieTitle", movie_details.getOriginal_title());
+                   updateFavoriteMovie.putExtra("moviePoster", movie_details.getPoster_path());
+                   updateFavoriteMovie.putExtra("moveBackdrop", movie_details.getBackdrop_path());
+                   updateFavoriteMovie.putExtra("movieOverview", movie_details.getOverview());
+                   updateFavoriteMovie.putExtra("movieReleaseDate", movie_details.getRelease_date());
+                   updateFavoriteMovie.putExtra("movieRating", movie_details.getVote_average());
+                   updateFavoriteMovie.putExtra("movie_ID", movie_details.getMovie_id());
+                   /*updateFavoriteMovie.putExtra("trailer_type", trailer_type);
+                   updateFavoriteMovie.putExtra("movieTrailerName", movieTrailerName);
+                   updateFavoriteMovie.putExtra("movieReviewAuthor", movieReviewAuthor);
+                   updateFavoriteMovie.putExtra("trailer_KEY", trailer_KEY);
+                   updateFavoriteMovie.putExtra("favorite_movie", Boolean.toString(checkFavorite));
+                   Log.v(TAG, movie_details.getOriginal_title() + " " + Boolean.toString(checkFavorite));
+
+                   startService(updateFavoriteMovie);*/
 
                }
            }
@@ -348,6 +368,21 @@ public class MovieDetailActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.movie_detail_menu, menu);
         return true;
+    }
+
+    private void addFavoriteMove() {
+        ContentValues updateFavoriteMovie = new ContentValues();
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movie_details.getMovie_id());
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_TITLE, movie_details.getOriginal_title());
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, movie_details.getPoster_path());
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, movie_details.getBackdrop_path());
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, movie_details.getOverview());
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movie_details.getRelease_date());
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie_details.getVote_average());
+        updateFavoriteMovie.put(MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL, Boolean.toString(checkFavorite));
+        Log.v(TAG, movie_details.getOriginal_title() + " " + Boolean.toString(checkFavorite));
+
+        long insertRowCount = mDb.insert(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN, null, updateFavoriteMovie);
     }
 
 }

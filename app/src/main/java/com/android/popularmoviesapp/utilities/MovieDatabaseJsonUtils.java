@@ -2,18 +2,18 @@ package com.android.popularmoviesapp.utilities;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.data.MovieData;
+import com.android.popularmoviesapp.data.MovieDbHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.IDN;
 import java.util.ArrayList;
-import java.util.List;
 
 public final class MovieDatabaseJsonUtils {
 
@@ -42,31 +42,7 @@ public final class MovieDatabaseJsonUtils {
     //public static List<String> trailer_Keys = new ArrayList<String>();
 
 
-    /*public static ArrayList<MovieData> getMovieData(String json) throws JSONException {
-
-
-        JSONObject movieData = new JSONObject(json);
-        JSONArray results = movieData.getJSONArray(RESULTS);
-
-        ArrayList<MovieData> moviesArray = new ArrayList<MovieData>();
-
-        for(int i = 0; i < results.length(); i++){
-            JSONObject currentMovie = results.getJSONObject(i);
-            MovieData movieSpecifics = new MovieData(
-                    currentMovie.getString(ORIGINAL_TITLE),
-                    currentMovie.getString(POSTER_PATH),
-                    currentMovie.getString(VOTE_AVERAGE),
-                    currentMovie.getString(RELEASE_DATE),
-                    currentMovie.getString(OVERVIEW)
-                    );
-            moviesArray.add(movieSpecifics);
-            //Log.v(TAG, moviesArray.get(i).getPoster_path());
-        }
-
-        return moviesArray;
-    }*/
-
-    public static ContentValues getContentValueReviewData (Context context, String movieJsonStr)
+    /*public static ContentValues getContentValueReviewData (Context context, String movieJsonStr)
             throws JSONException {
 
         JSONObject reviewData = new JSONObject(movieJsonStr);
@@ -105,9 +81,9 @@ public final class MovieDatabaseJsonUtils {
         }
 
         return reviewContentValues;
-    }
+    }*/
 
-    public static ContentValues getContentValueTrailerData (Context context, String trailerJsonStr)
+    /*public static ContentValues getContentValueTrailerData (Context context, String trailerJsonStr)
             throws JSONException {
 
         JSONObject trailerData = new JSONObject(trailerJsonStr);
@@ -157,18 +133,22 @@ public final class MovieDatabaseJsonUtils {
         }
 
         return trailerContentValues;
-    }
+    }*/
 
-    public static ContentValues getFavoriteContentValueData (Context context){
+    public static void getFavoriteContentValueData (Context context, MovieData data, boolean checkFavBool){
+        SQLiteDatabase mDb;
+        MovieDbHelper movieDbHelper = new MovieDbHelper(context);
 
-        String original_title = MovieContract.MovieEntry.COLUMN_TITLE;
-        String posterPath = MovieContract.MovieEntry.COLUMN_POSTER_PATH;
-        String backdropPath = MovieContract.MovieEntry.COLUMN_BACKDROP_PATH;
-        String overview = MovieContract.MovieEntry.COLUMN_OVERVIEW;
-        String voteAverage = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE;
-        String releaseDate = MovieContract.MovieEntry.COLUMN_RELEASE_DATE;
-        String id  = MovieContract.MovieEntry.COLUMN_MOVIE_ID;
-        String fav_bool = MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL;
+
+        String original_title = data.getOriginal_title();
+        String posterPath = data.getPoster_path();
+        String backdropPath = data.getBackdrop_path();
+        String overview = data.getOverview();
+        String voteAverage = data.getVote_average();
+        String releaseDate = data.getRelease_date();
+        String id  = data.getMovie_id();
+        String fav_bool = Boolean.toString(checkFavBool);
+        Log.d(TAG, fav_bool);
 
 
         ContentValues favoriteData = new ContentValues();
@@ -181,7 +161,8 @@ public final class MovieDatabaseJsonUtils {
         favoriteData.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
         favoriteData.put(MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL, fav_bool);
 
-        return favoriteData;
+        mDb = movieDbHelper.getWritableDatabase();
+        long rowCount = mDb.insert(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN, null, favoriteData);
     }
 
     public static ContentValues[] getContentValueMovieData (Context context, String movieJsonStr)
@@ -205,8 +186,6 @@ public final class MovieDatabaseJsonUtils {
             String voteAverage;
             String releaseDate;
             String id;
-            String popularity;
-
             // get current JSON object
             JSONObject currentMovie = results.getJSONObject(i);
 
@@ -218,7 +197,6 @@ public final class MovieDatabaseJsonUtils {
             voteAverage = currentMovie.getString(VOTE_AVERAGE);
             releaseDate = currentMovie.getString(RELEASE_DATE);
             id = currentMovie.getString(MOVIE_ID);
-            popularity = currentMovie.getString(POPULARITY);
 
             ContentValues movieSpecifics = new ContentValues();
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_TITLE, original_title);
@@ -228,7 +206,6 @@ public final class MovieDatabaseJsonUtils {
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);
             movieSpecifics.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
-            movieSpecifics.put(MovieContract.MovieEntry.COLUMN_POPULARITY, popularity);
 
             movieContentValues[i] = movieSpecifics;
         }

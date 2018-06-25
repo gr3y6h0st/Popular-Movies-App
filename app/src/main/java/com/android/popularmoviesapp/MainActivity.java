@@ -21,21 +21,17 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 
 import com.android.popularmoviesapp.data.MovieContract;
 import com.android.popularmoviesapp.data.MovieData;
 import com.android.popularmoviesapp.data.MovieDbHelper;
-import com.android.popularmoviesapp.sync.MovieInfoQueryIntentService;
-import com.android.popularmoviesapp.sync.MovieInfoSyncIntentService;
-import com.android.popularmoviesapp.sync.MovieReviewIntentService;
-import com.android.popularmoviesapp.sync.MovieTrailerIntentService;
 import com.android.popularmoviesapp.utilities.MovieDatabaseJsonUtils;
 import com.android.popularmoviesapp.utilities.NetworkUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.android.popularmoviesapp.utilities.NetworkUtils.getResponseFromHttpUrl;
 
@@ -45,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements
         MoviesAdapter.MoviesAdapterOnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final String TAG = MainActivity.class.getSimpleName();
-    private NetworkUtils networkUtils = new NetworkUtils();
     private SQLiteDatabase mDb;
 
     public static final String[] MOVIE_DATA_ARRAY = {
@@ -56,12 +51,6 @@ public class MainActivity extends AppCompatActivity implements
             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
-            MovieContract.MovieEntry.COLUMN_TRAILER_KEY,
-            MovieContract.MovieEntry.COLUMN_TRAILER_TYPE,
-            MovieContract.MovieEntry.COLUMN_TRAILER_NAME,
-            MovieContract.MovieEntry.COLUMN_REVIEW_AUTHOR,
-            MovieContract.MovieEntry.COLUMN_REVIEW_CONTENT,
-            MovieContract.MovieEntry.COLUMN_REVIEW_URL,
             MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL
     };
 
@@ -72,16 +61,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int INDEX_RELEASE_DATE = 4;
     public static final int INDEX_OVERVIEW = 5;
     public static final int INDEX_COLUMN_MOVIE_ID = 6;
-
-    public static final int INDEX_TRAILER_KEY = 7;
-    public static final int INDEX_TRAILER_TYPE = 8;
-    public static final int INDEX_TRAILER_NAME = 9;
-
-    public static final int INDEX_REVIEW_AUTHOR = 10;
-    public static final int INDEX_REVIEW_CONTENT = 11;
-    public static final int INDEX_REVIEW_URL = 12;
-
-    public static final int INDEX_FAV_BOOL = 13;
+    public static final int INDEX_FAV_BOOL = 7;
 
     public static final int ID_MOVIE_LOADER = 19;
     public static final int ID_FAVORITES_LOADER = 400;
@@ -111,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements
         mMovieList.setLayoutManager(layoutManager);
         mMovieList.setHasFixedSize(true);
 
-        setupMB();
+        //setupMB();
         mAdapter = new MoviesAdapter(this, movieData, this);
 
         mMovieList.setAdapter(mAdapter);
@@ -119,8 +99,8 @@ public class MainActivity extends AppCompatActivity implements
         LoaderManager loaderManager = getSupportLoaderManager();
         loaderManager.initLoader(ID_MOVIE_LOADER, null, this);
 
-        //MovieDbHelper movieDbHelper = new MovieDbHelper(this);
-        //mDb = movieDbHelper.getWritableDatabase();
+        MovieDbHelper movieDbHelper = new MovieDbHelper(this);
+        mDb = movieDbHelper.getWritableDatabase();
 
         //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
         //startService(syncMovieInfo);
@@ -144,11 +124,7 @@ public class MainActivity extends AppCompatActivity implements
         loadMovieSortPreference(preferences);
 
         //set listener for changes in Preference data
-        preferences.registerOnSharedPreferenceChangeListener(this);
-
-        //Intent syncMovieInfo = new Intent(this, MovieInfoSyncIntentService.class);
-        //startService(syncMovieInfo);
-
+        //preferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -195,26 +171,18 @@ public class MainActivity extends AppCompatActivity implements
             }
 
             case "favorites": {
-
                 getSupportLoaderManager().destroyLoader(ID_MOVIE_LOADER);
-                getSupportLoaderManager().restartLoader(ID_FAVORITES_LOADER, null, this);
 
-                mDb.beginTransaction();
-                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                displayFavoriteMovies();
+                //getSupportLoaderManager().restartLoader(ID_FAVORITES_LOADER, null, this);
+
+                /*Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                         new String[]{MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL},
                         MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " = ? ",
                         new String[]{"true"},
                         null,
                         null,
-                        null);
-
-                //mAdapter.swapCursor(cursor);
-
-                System.out.println(value);
-                mDb.endTransaction();
-                cursor.close();
-
-
+                        null);*/
                 break;
             }
 
@@ -233,27 +201,6 @@ public class MainActivity extends AppCompatActivity implements
 
                     loaderManager.restartLoader(ID_MOVIE_LOADER, sortPrefBundle, this);
                 }
-
-                /*networkUtils.setSortOrder(preferences.getString(getString(R.string.sort_key),
-                        getString(R.string.sort_highest_rated_value)));
-
-                System.out.println(value);
-
-                Intent queryTopRatedMovieInfo = new Intent(this, MovieInfoQueryIntentService.class);
-
-                queryTopRatedMovieInfo.putExtra("query_type", value);
-                startService(queryTopRatedMovieInfo);
-
-                Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null);
-                cursor.close();
-
-                this.getContentResolver().notifyChange(MovieContract.MovieEntry.CONTENT_URI, null);*/
                 break;
             }
         }
@@ -270,13 +217,25 @@ public class MainActivity extends AppCompatActivity implements
                 System.out.println(loaderId);
 
                 return new AsyncTaskLoader<ArrayList<MovieData>>(this) {
+                    ArrayList<MovieData> mMovieData;
+
+                    @Override
+                    public void deliverResult(@Nullable ArrayList<MovieData> data) {
+                        mMovieData = data;
+                        super.deliverResult(data);
+                    }
+
                     @Override
                     protected void onStartLoading() {
                         super.onStartLoading();
                         if (args == null) {
                             return;
                         }
-                        forceLoad();
+                        if (mMovieData != null) {
+                            deliverResult(mMovieData);
+                        } else{
+                            forceLoad();
+                        }
                     }
 
                     @Override
@@ -307,7 +266,6 @@ public class MainActivity extends AppCompatActivity implements
                 };
 
             /*case ID_FAVORITES_LOADER:
-
                 Uri favoritesQueryUri = MovieContract.MovieEntry.buildFavoriteMovieUri();
 
                 return new android.support.v4.content.CursorLoader(this,
@@ -316,7 +274,6 @@ public class MainActivity extends AppCompatActivity implements
                         null,
                         null,
                         null);*/
-
             default:
                 throw new RuntimeException("Loader not implemented: " + loaderId);
 
@@ -365,11 +322,6 @@ public class MainActivity extends AppCompatActivity implements
         //if(cursor.getCount() != 0)
     }
 
-    //parameters should be ArrayList<MovieData>?
-    //
-    //
-    //
-
     @Override
     public void onLoaderReset(@NonNull android.support.v4.content.Loader<ArrayList<MovieData>> loader) {
         //mAdapter.swapCursor(null);
@@ -380,6 +332,7 @@ public class MainActivity extends AppCompatActivity implements
 
         Intent intentToStartMovieDetailActivity = new Intent(MainActivity.this, MovieDetailActivity.class);
         intentToStartMovieDetailActivity.putExtra("movieDeets", movieDataArrayList.get(clickedItemIndex));
+        intentToStartMovieDetailActivity.putExtra("moviePosition", clickedItemIndex);
         startActivity(intentToStartMovieDetailActivity);
 
     }
@@ -408,6 +361,57 @@ public class MainActivity extends AppCompatActivity implements
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void displayFavoriteMovies() {
+
+        Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        /*Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
+                new String[]{MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL},
+                MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL + " = ? ",
+                new String[]{"true"},
+                null,
+                null,
+                null);*/
+
+        ArrayList<MovieData> result = new ArrayList<>();
+
+        try {
+            while(cursor.moveToNext()){
+                String item_id = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+
+                MovieData movieData = new MovieData(
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID)),
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE)),
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW)),
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE)),
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE)),
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH)),
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH)),
+                        cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL)));
+                System.out.println(item_id + " " + movieData.getBackdrop_path());
+                result.add(movieData);
+            }
+        } finally {
+            cursor.close();
+        }
+        mAdapter.notifyMovieDataChange(result);
+        //mMovieList.setAdapter(mAdapter);
+                /*Uri favoritesQueryUri = MovieContract.MovieEntry.buildFavoriteMovieUri();
+
+                /*return new android.support.v4.content.CursorLoader(this,
+                        favoritesQueryUri,
+                        MOVIE_DATA_ARRAY,
+                        null,
+                        null,
+                        null);*/
+
     }
 
 
