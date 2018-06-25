@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void displayFavoriteMovies() {
-
+        movieDataArrayList.clear();
         Cursor cursor = mDb.query(MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                 null,
                 null,
@@ -380,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements
                 null,
                 null);*/
 
-        ArrayList<MovieData> result = new ArrayList<>();
+//        ArrayList<MovieData> result = new ArrayList<>();
 
         try {
             while(cursor.moveToNext()){
@@ -396,12 +396,12 @@ public class MainActivity extends AppCompatActivity implements
                         cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH)),
                         cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVORITE_BOOL)));
                 System.out.println(item_id + " " + movieData.getBackdrop_path());
-                result.add(movieData);
+                movieDataArrayList.add(movieData);
             }
         } finally {
             cursor.close();
         }
-        mAdapter.notifyMovieDataChange(result);
+        mAdapter.notifyMovieDataChange(movieDataArrayList);
         //mMovieList.setAdapter(mAdapter);
                 /*Uri favoritesQueryUri = MovieContract.MovieEntry.buildFavoriteMovieUri();
 
