@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/movie_review_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollHorizontally="true"
+        android:textSize="18sp"
+        android:visibility="visible"
+        android:maxLines="7"
+        android:ellipsize="end"
+        tools:text="@string/No_Review_Text" />
+
+    <TextView
+        android:id="@+id/md_review_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="end"
+        tools:text="READ MORE" />
+
+</LinearLayout>
