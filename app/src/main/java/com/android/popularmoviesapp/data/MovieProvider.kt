@@ -24,8 +24,8 @@ class MovieProvider : ContentProvider() {
                        selectionArgs: Array<String>?, sortOrder: String?): Cursor? {
         val cursor: Cursor
         val db = mOpenHelper!!.readableDatabase
-        when (sUriMatcher.match(uri)) {
-            CODE_MOVIE -> cursor = db.query(
+        cursor = when (sUriMatcher.match(uri)) {
+            CODE_MOVIE -> db.query(
                     MovieContract.MovieEntry.TABLE_NAME_MOVIE_MAIN,
                     projection,
                     selection,
@@ -34,7 +34,7 @@ class MovieProvider : ContentProvider() {
 
             CODE_MOVIE_FAVORITE ->
 
-                cursor = db.query(null, null, null, null, null, null,
+                db.query(null, null, null, null, null, null,
                         MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE)
             else -> throw UnsupportedOperationException("Unknown uri: $uri")
         }
