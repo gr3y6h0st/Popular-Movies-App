@@ -160,7 +160,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/movie_detail_iv" />
+                app:layout_constraintTop_toBottomOf="@+id/md_vote_avg_label" />
 
             <TextView
                 android:id="@+id/md_plot_synopsis"
